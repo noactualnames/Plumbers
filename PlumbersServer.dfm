@@ -1,7 +1,7 @@
 object PlumbersResource1: TPlumbersResource1
   OldCreateOrder = False
   Height = 467
-  Width = 775
+  Width = 544
   object FDPlumDBConnection: TFDConnection
     Params.Strings = (
       'Database=B:\Code\Projects\Plumbers potugi\PLUMBERAGENCY.FDB'
@@ -14,39 +14,32 @@ object PlumbersResource1: TPlumbersResource1
     Left = 48
     Top = 24
   end
-  object FDSelectOperators: TFDQuery
-    Connection = FDPlumDBConnection
-    SQL.Strings = (
-      'select * from OPERATOR;')
-    Left = 48
-    Top = 88
-  end
   object FDSelectOrders: TFDQuery
     Connection = FDPlumDBConnection
     SQL.Strings = (
-      'select * from ORDERS;')
-    Left = 136
+      'select * from ORDERS where order_status <> '#39'completed'#39';')
+    Left = 48
     Top = 88
   end
   object FDSelectOrdersInfo: TFDQuery
     Connection = FDPlumDBConnection
     SQL.Strings = (
       'select * from ORDER_INFO;')
-    Left = 224
+    Left = 136
     Top = 88
   end
   object FDSelectPlumbers: TFDQuery
     Connection = FDPlumDBConnection
     SQL.Strings = (
-      'select * from PLUMBER;')
-    Left = 328
+      'select plumber_id, plumber_status, plumber_name from PLUMBER;')
+    Left = 240
     Top = 88
   end
   object FDCheckOperatorAuth: TFDStoredProc
     Connection = FDPlumDBConnection
     StoredProcName = 'OPERATOR_CHECK_AUTH'
-    Left = 512
-    Top = 88
+    Left = 48
+    Top = 160
     ParamData = <
       item
         Position = 1
@@ -78,8 +71,8 @@ object PlumbersResource1: TPlumbersResource1
   object FDRegOP: TFDStoredProc
     Connection = FDPlumDBConnection
     StoredProcName = 'OPERATOR_ADD'
-    Left = 512
-    Top = 144
+    Left = 48
+    Top = 216
     ParamData = <
       item
         Position = 1
@@ -118,8 +111,8 @@ object PlumbersResource1: TPlumbersResource1
   object FDAddOrder: TFDStoredProc
     Connection = FDPlumDBConnection
     StoredProcName = 'ORDERS_ADD'
-    Left = 512
-    Top = 208
+    Left = 48
+    Top = 280
     ParamData = <
       item
         Position = 1
@@ -130,26 +123,30 @@ object PlumbersResource1: TPlumbersResource1
       item
         Position = 2
         Name = 'IN_CREATION_DATE'
-        DataType = ftDate
+        DataType = ftString
         ParamType = ptInput
+        Size = 20
       end
       item
         Position = 3
         Name = 'IN_BEGIN_DATE'
-        DataType = ftDate
+        DataType = ftString
         ParamType = ptInput
+        Size = 20
       end
       item
         Position = 4
         Name = 'IN_READ_DATE'
-        DataType = ftDate
+        DataType = ftString
         ParamType = ptInput
+        Size = 20
       end
       item
         Position = 5
         Name = 'IN_END_DATE'
-        DataType = ftDate
+        DataType = ftString
         ParamType = ptInput
+        Size = 20
       end
       item
         Position = 6
@@ -172,6 +169,12 @@ object PlumbersResource1: TPlumbersResource1
       end
       item
         Position = 9
+        Name = 'IN_MODE'
+        DataType = ftInteger
+        ParamType = ptInput
+      end
+      item
+        Position = 10
         Name = 'OUT_ORDER_ID'
         DataType = ftInteger
         ParamType = ptOutput
@@ -180,8 +183,8 @@ object PlumbersResource1: TPlumbersResource1
   object FDAddOrderInfo: TFDStoredProc
     Connection = FDPlumDBConnection
     StoredProcName = 'ORDER_INFO_ADD'
-    Left = 512
-    Top = 264
+    Left = 48
+    Top = 336
     ParamData = <
       item
         Position = 1
@@ -234,8 +237,8 @@ object PlumbersResource1: TPlumbersResource1
   object FDChangeOpEditStatus: TFDStoredProc
     Connection = FDPlumDBConnection
     StoredProcName = 'CHANGE_OPERATOR_EDIT_STATUS'
-    Left = 512
-    Top = 320
+    Left = 48
+    Top = 392
     ParamData = <
       item
         Position = 1
@@ -253,8 +256,8 @@ object PlumbersResource1: TPlumbersResource1
   object FDCheckPlumberAuth: TFDStoredProc
     Connection = FDPlumDBConnection
     StoredProcName = 'PLUMBER_CHECK_AUTH'
-    Left = 640
-    Top = 88
+    Left = 176
+    Top = 160
     ParamData = <
       item
         Position = 1
@@ -292,8 +295,8 @@ object PlumbersResource1: TPlumbersResource1
   object FDRegPlumber: TFDStoredProc
     Connection = FDPlumDBConnection
     StoredProcName = 'PLUMBER_ADD'
-    Left = 640
-    Top = 144
+    Left = 176
+    Top = 216
     ParamData = <
       item
         Position = 1
@@ -339,8 +342,8 @@ object PlumbersResource1: TPlumbersResource1
   object FDUpdatePlumAndOrderStatus: TFDStoredProc
     Connection = FDPlumDBConnection
     StoredProcName = 'UPDATE_PLUMBER_AND_ORDER_STATUS'
-    Left = 640
-    Top = 208
+    Left = 176
+    Top = 280
     ParamData = <
       item
         Position = 1
@@ -356,10 +359,82 @@ object PlumbersResource1: TPlumbersResource1
       end
       item
         Position = 3
-        Name = 'IN_STATUS'
+        Name = 'IN_ORDER_STATUS'
         DataType = ftString
         ParamType = ptInput
         Size = 15
+      end
+      item
+        Position = 4
+        Name = 'IN_PLUMBER_STATUS'
+        DataType = ftString
+        ParamType = ptInput
+      end
+      item
+        Position = 5
+        Name = 'OUT_UPDATED'
+        DataType = ftBoolean
+        ParamType = ptOutput
+      end>
+  end
+  object FDGetAssignedOrder: TFDStoredProc
+    Connection = FDPlumDBConnection
+    StoredProcName = 'IS_SOME_ORDER_ASSIGNED'
+    Left = 176
+    Top = 336
+    ParamData = <
+      item
+        Position = 1
+        Name = 'IN_PLUMBER_ID'
+        DataType = ftInteger
+        ParamType = ptInput
+      end
+      item
+        Position = 2
+        Name = 'OUT_ASSIGNED'
+        DataType = ftBoolean
+        ParamType = ptOutput
+      end
+      item
+        Position = 3
+        Name = 'OUT_ORDER_ID'
+        DataType = ftInteger
+        ParamType = ptOutput
+      end
+      item
+        Position = 4
+        Name = 'OUT_ORDER_STATUS'
+        DataType = ftString
+        ParamType = ptOutput
+        Size = 15
+      end>
+  end
+  object FDSelectOneOrder: TFDQuery
+    Connection = FDPlumDBConnection
+    SQL.Strings = (
+      'select * from ORDERS where order_id = :in_id;')
+    Left = 344
+    Top = 88
+    ParamData = <
+      item
+        Name = 'IN_ID'
+        DataType = ftInteger
+        ParamType = ptInput
+        Value = Null
+      end>
+  end
+  object FDSelectOneOrderInfo: TFDQuery
+    Connection = FDPlumDBConnection
+    SQL.Strings = (
+      'select * from ORDER_INFO where order_info_id = :in_id;')
+    Left = 448
+    Top = 88
+    ParamData = <
+      item
+        Name = 'IN_ID'
+        DataType = ftInteger
+        ParamType = ptInput
+        Value = Null
       end>
   end
 end

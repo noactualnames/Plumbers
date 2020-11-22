@@ -17,7 +17,6 @@ type
   [ResourceName('Plumbers')]
   TPlumbersResource1 = class(TDataModule)
     FDPlumDBConnection: TFDConnection;
-    FDSelectOperators: TFDQuery;
     FDSelectOrders: TFDQuery;
     FDSelectOrdersInfo: TFDQuery;
     FDSelectPlumbers: TFDQuery;
@@ -29,12 +28,19 @@ type
     FDCheckPlumberAuth: TFDStoredProc;
     FDRegPlumber: TFDStoredProc;
     FDUpdatePlumAndOrderStatus: TFDStoredProc;
+    FDGetAssignedOrder: TFDStoredProc;
+    FDSelectOneOrder: TFDQuery;
+    FDSelectOneOrderInfo: TFDQuery;
   published
     procedure Get(const AContext: TEndpointContext; const ARequest: TEndpointRequest; const AResponse: TEndpointResponse);
     procedure Post(const AContext: TEndpointContext; const ARequest: TEndpointRequest; const AResponse: TEndpointResponse);
 
     function GetDbData(FDQuery: TFDQuery): TJSONObject;
     function GetAllDBData(): TJSONObject;
+    procedure UpdatePlumberStatus(PlumberID: integer; Status: string);
+    procedure UpdateOrderStatus(OrderID: integer; Status: string);
+    function GetPlumbersAssignedOrder(PlumberID : integer) : TJSONObject;
+    function SetDateToPlumbersAssignedOrder(ARequest : TEndpointRequest): TJSONObject;
 
     function FormJSONResponseMessage(msgtype: string; msg: string): TJSONObject;
 
@@ -44,13 +50,16 @@ type
     function CheckAccountLoginExists(Login: string; AuthMode: integer): Boolean;
     function RegisterAccount(ARequest: TEndpointRequest): TJSONObject;
 
-    function SetDateFormatSettings(): TFormatSettings;
     procedure SetOperatorEditStatus(CreatorOpID: integer; EditorOpID: integer);
     function AddOrChangeOrder(ResponseObject : TJSONObject): integer;
     function AddOrChangeOrderInfo(ResponseObject: TJSONObject; AddedOrderID: integer) : integer;
     function AddOrChangeOrderAndOrderInfo(ARequest: TEndpointRequest): TJSONObject;
 
+    function UpdatePlumberOrderStatus(PlumberID: Integer; PlumberStatus: string; OrderID: Integer; OrderStatus: string): TJSONObject;
     function AssignPlumberToOrder(ARequest: TEndpointRequest): TJSONObject;
+    function DisconnectPlumber(ARequest: TEndpointRequest): TJSONObject;
+
+    function test(ARequest: TEndpointRequest): TJSONObject;
   end;
 
 implementation
@@ -60,7 +69,13 @@ implementation
 {$R *.dfm}
 
 function TPlumbersResource1.FormJSONResponseMessage(msgtype: string; msg: string): TJSONObject;
-
+{
+  Описание:
+    Создаёт JSON-объект ответа сервера, содержащий пару "msgtype" : "msg"
+  Параметры:
+    1) msgtypе - ключ пары
+    2) msg - значение пары
+}
 begin
   Result:= TJSONObject.Create;
   Result.AddPair(msgtype, msg);
@@ -68,10 +83,24 @@ end;
 
 
 function TPlumbersResource1.CheckAccountAuthorization(ARequest: TEndpointRequest; var ID: integer): Boolean;
-var LoginStr, PasswordStr, HashedPassword, AuthModeStr: string;
-truth: Boolean;
-StoredProc: TFDStoredProc;
-AuthMode: integer;
+{
+  Описание:
+    Функция проверяет, правильно ли введены данные входа, поступившие с клиента
+  Параметры:
+    1) ARequest - объект, содержащий запрос от клиента
+    2) ID - параметр-переменная, в случае если в базе данных есть данные авторизации пользователя или
+    оператора вернёт ID этой записи в базе
+  Результат:
+    Если данные введены верно, то функция вернёт true, иначе false
+}
+var
+LoginStr, // Логин оператора/сантехника
+PasswordStr, // Пароль оператора/сантехника
+HashedPassword, // Хэшированный пароль
+AuthModeStr: string; // Режим входа. 1 - оператор, 2 - сантехник
+StoredProc: TFDStoredProc; // в зависимости от значения AuthMode получит ссылку на объект нужной хранимой
+                          // процедуры
+AuthMode: integer; // Числовое значение режима входа
 begin
   Result:= false;
   ARequest.Params.TryGetValue('login', LoginStr);
@@ -102,10 +131,18 @@ begin
 end;
 
 function TPlumbersResource1.GetDbData(FDQuery: TFDQuery): TJSONObject;
-var dbArrayData: TJSONArray;
-mainContainer, dbRow: TJSONObject;
-columnName: string;
-I: Integer;
+{
+  Описание:
+    Возвращает JSON-объект - представление нужных данных базы для работы оператора
+  Параметры:
+    1) FDQuery - объект нужного запроса к базе
+}
+var
+dbArrayData: TJSONArray; // JSON-массив объектов, хранимых в таблицах
+mainContainer, // возвращаемый объект
+dbRow: TJSONObject; // объект представления каждой записи в таблице
+columnName: string; // имя столбца в таблице
+I: Integer; // переменная-счётчик столбцов запроса
 begin
     FDQuery.Open();
     FDQuery.First;
@@ -121,7 +158,8 @@ begin
         or (FDQuery.FieldByName(columnName).DataType = ftFloat) then
             dbRow.AddPair(columnName,
                           TJSONNumber.Create(FDQuery.FieldByName(columnName).AsString))
-        else dbRow.AddPair(columnName,
+        else
+            dbRow.AddPair(columnName,
                            TJSONString.Create(FDQuery.FieldByName(columnName).AsString));
       end;
       dbArrayData.Add(dbRow);
@@ -133,7 +171,73 @@ begin
     Result:= mainContainer;
 end;
 
+procedure TPlumbersResource1.UpdatePlumberStatus(PlumberID: integer; Status: string);
+{
+  Описание:
+    Присваивает переданный статус сантехнику с переданным ID
+}
+begin
+  FDUpdatePlumAndOrderStatus.Prepare;
+  FDUpdatePlumAndOrderStatus.ParamByName('in_plumber_id').Value:= PlumberID;
+  FDUpdatePlumAndOrderStatus.ParamByName('in_plumber_status').Value:= Status;
+  FDUpdatePlumAndOrderStatus.ExecProc;
+end;
+
+procedure TPlumbersResource1.UpdateOrderStatus(OrderID: integer; Status: string);
+{
+  Описание:
+    Присваивает переданный статус заказу с переданным ID
+}
+begin
+  FDUpdatePlumAndOrderStatus.Prepare;
+  FDUpdatePlumAndOrderStatus.ParamByName('in_order_id').Value:= OrderID;
+  FDUpdatePlumAndOrderStatus.ParamByName('in_order_status').Value:= Status;
+  FDUpdatePlumAndOrderStatus.ExecProc;
+end;
+
+function TPlumbersResource1.GetPlumbersAssignedOrder(PlumberID : integer) : TJSONObject;
+{
+  Описание:
+    Получает информацию о назначенном заказе для сантехника по ID сантехника.
+    Если назначенного заказа нет, то возвращает 0 в поле order_id.
+}
+var
+OrderID: integer;
+OrderStatus: string;
+begin
+  Result:= TJSONObject.Create;
+  FDGetAssignedOrder.Prepare;
+  FDGetAssignedOrder.FindParam('in_plumber_id').Value:= PlumberID;
+  FDGetAssignedOrder.ExecProc;
+
+  if FDGetAssignedOrder.FindParam('out_assigned').AsBoolean then begin
+    OrderID:= FDGetAssignedOrder.FindParam('out_order_id').AsInteger;
+    OrderStatus:= FDGetAssignedOrder.FindParam('out_order_status').AsString;
+
+    if (OrderStatus = 'assigned') or (OrderStatus = 'watched') then
+      UpdatePlumberStatus(PlumberID, 'assigned');
+    if OrderStatus = 'processing' then UpdatePlumberStatus(PlumberID, 'working');
+
+    FDSelectOneOrder.ParamByName('in_id').Value:= OrderID;
+    FDSelectOneOrderInfo.ParamByName('in_id').Value:= OrderID;
+
+    Result.AddPair('order', GetDbData(FDSelectOneOrder));
+    Result.AddPair('order_info', GetDbData(FDSelectOneOrderInfo));
+  end
+  else begin
+    UpdatePlumberStatus(PlumberID, 'online');
+    Result.AddPair('order_id', TJSONNumber.Create(0));
+  end;
+end;
+
 function TPlumbersResource1.GetAllDBData(): TJSONObject;
+{
+  Описание:
+    Создаёт JSON-объект со всей информацией из базы данных, необходимой для работы оператору:
+    - данные сантехников
+    - данные о невыполненных заказах
+    - данные описания этих заказов
+}
 var JSONResponse: TJSONObject;
 begin
     JSONResponse:= TJSONObject.Create;
@@ -144,7 +248,21 @@ begin
 end;
 
 function TPlumbersResource1.AuthAccount(ARequest: TEndpointRequest): TJSONObject;
-var ID, AuthMode: integer;
+{
+  Описание:
+    Авторизует аккаунт.
+    Если передаются верные данные входа оператора (AuthMode = 1), то в ответе содержится JSON-объект со всей необходимой
+    информацией для обработки на клиенте.
+    Если передаются верные данные входа сантехника (AuthMode = 2), то в ответе содежится JSON-объект с информацией о
+    заказе, назначенном этому сантехнику.
+    Функция используется для обновления данных при повторных запросах.
+  Результат:
+    JSON-объект, содержащий данные, в зависимости от переданного в параметрах запроса AuthMode в случае
+    успеха, иначе объект, содержащий описание ошибки
+}
+var
+ID,
+AuthMode: integer;
 AuthModeStr: string;
 begin
     Result:= TJSONObject.Create;
@@ -152,14 +270,8 @@ begin
       ARequest.Params.TryGetValue('mode', AuthModeStr);
       AuthMode:= StrToInt(AuthModeStr);
       case AuthMode of
-      1:
-        begin
-          Result:= GetAllDBData();
-        end;
-      2:
-        begin
-        // В случае надобности добавить что-то сюда
-        end;
+        1: Result:= GetAllDBData();
+        2: Result:= GetPlumbersAssignedOrder(ID);
       end;
 
       Result.AddPair('ID', TJSONNumber.Create(ID));
@@ -168,6 +280,13 @@ begin
 end;
 
 function TPlumbersResource1.CheckAccountLoginExists(Login: string; AuthMode: integer): Boolean;
+{
+  Описание:
+    Проверяет, существует ли в базе данных аккаунт оператора/сантехника с переданным логином.
+  Параметры:
+    1) Login - логин аккаунта
+    2) AuthMode - режим авторизации: 1 - оператор, 2 - сантехник
+}
 var StoredProc: TFDStoredProc;
 begin
   Result:= false;
@@ -187,6 +306,13 @@ begin
 end;
 
 function TPlumbersResource1.RegisterAccount(ARequest: TEndpointRequest): TJSONObject;
+{
+  Описание:
+    Функция проверяет, существует ли логин, который желает зарегистрироваться, если нет,
+    то создаёт запись в базе с переданными в теле запроса логином и паролем.
+  Результат:
+    Возвращает JSON-объект, response в случае успеха, error в случае ошибки
+}
 var
 AuthMode: integer;
 AccountData: TJSONObject;
@@ -217,7 +343,7 @@ begin
 
         case AuthMode of
           1: StoredProc.ParamByName('in_edit_status').Value:= false;
-          2: StoredProc.ParamByName('in_status').Value:= 'Не в сети';
+          2: StoredProc.ParamByName('in_status').Value:= 'offline';
         end;
 
         StoredProc.ExecProc;
@@ -228,18 +354,14 @@ begin
   else Result:= FormJSONResponseMessage('error', 'JSON expected');
 end;
 
-
-function TPlumbersResource1.SetDateFormatSettings(): TFormatSettings;
-begin
-  Result := TFormatSettings.Create;
-  Result.DateSeparator := '.';
-  Result.ShortDateFormat := 'dd.MM.yyyy';
-  Result.TimeSeparator := ':';
-  Result.ShortTimeFormat := 'hh:mm';
-  Result.LongTimeFormat := 'hh:mm:ss';
-end;
-
 procedure TPlumbersResource1.SetOperatorEditStatus(CreatorOpID: integer; EditorOpID: integer);
+{
+  Описание:
+    Обновляет статус редактирования заказа другим оператором
+  Параметры:
+    1) CreatorOpID - ID оператора, создавшего заказ
+    2) EditorOpID - ID оператора, редактирующего заказ
+}
 begin
   if CreatorOpID <> EditorOpID then begin
     FDChangeOpEditStatus.Prepare;
@@ -250,17 +372,25 @@ begin
 end;
 
 function TPlumbersResource1.AddOrChangeOrder(ResponseObject : TJSONObject): integer;
+{
+  Описание:
+    Функция добавляет или изменяет заказ по полученному ID
+  Параметры:
+    1) ResponseObject - JSON-объект, в котором содержатся поля orderid, operatorid, а также
+    JSON-объект с полями заказа. В случае если orderid = 0 создаётся новый заказ, иначе редактируется
+    существующий
+}
 var
 OrderData: TJSONObject;
 ChangeOrCreateOrderID, OperatorID: integer;
 TmpOrderID, TmpOpID: TJSONNumber;
-DateFormatSettings: TFormatSettings;
+ReceivedDateTime: string;
+PlumberID: integer;
 begin
   if ResponseObject.TryGetValue('orderid', TmpOrderID) then
     ChangeOrCreateOrderID:= TmpOrderID.Value.ToInteger;
   if ResponseObject.TryGetValue('operatorid', TmpOpID) then
     OperatorID:= TmpOpID.Value.ToInteger;
-  DateFormatSettings:= SetDateFormatSettings;
   Result:= 0;
 
   if ResponseObject.TryGetValue('orderdata', OrderData) then begin
@@ -269,16 +399,24 @@ begin
 
     if ChangeOrCreateOrderID = 0 then
     begin
-      FDAddOrder.ParamByName('in_creation_date').Value:= StrToDateTime(OrderData.GetValue('creation_date').Value, DateFormatSettings);
+      OrderData.TryGetValue('creation_date', ReceivedDateTime);
+      FDAddOrder.FindParam('in_mode').Value:= 0;
+      FDAddOrder.ParamByName('in_creation_date').Value:= ReceivedDateTime;
       FDAddOrder.ParamByName('in_operator_id').Value:= OrderData.GetValue('order_operator_id').Value.ToInteger;
-      FDAddOrder.ParamByName('in_status').Value:= OrderData.GetValue('order_status').Value;
+      FDAddOrder.ParamByName('in_status').Value:= 'free';
       FDAddOrder.ExecProc;
       Result:= FDAddOrder.Params.FindParam('out_order_id').AsInteger;
     end
     else begin
       SetOperatorEditStatus(OrderData.GetValue('order_operator_id').Value.ToInteger, OperatorID);
-      FDAddOrder.ParamByName('in_status').Value:= OrderData.GetValue('order_status').Value;
-      FDAddOrder.ParamByName('in_plumber_id').Value:= OrderData.GetValue('order_plumber_id').Value.ToInteger;
+      FDAddOrder.FindParam('in_mode').Value:= 0;
+
+      PlumberID:= OrderData.GetValue('order_plumber_id').Value.ToInteger;
+      if PlumberID = 0 then begin
+        FDAddOrder.ParamByName('in_status').Value:= 'free';
+        UpdatePlumberStatus(PlumberID, 'offline');
+      end;
+      FDAddOrder.ParamByName('in_plumber_id').Value:= PlumberID;
       FDAddOrder.ExecProc;
       Result:= ChangeOrCreateOrderID;
     end;
@@ -286,6 +424,15 @@ begin
 end;
 
 function TPlumbersResource1.AddOrChangeOrderInfo(ResponseObject: TJSONObject; AddedOrderID: integer): integer;
+{
+  Описание:
+    Добавление или изменение информации о заказе.
+  Параметры:
+    1) ResponseObject - объект, содержащий информационные поля
+    2) AddedOrderID - ID добавляемого/изменяемого заказа
+  Результат:
+    Возвращает ID созданной/изменённой записи информации о заказе.
+}
 var
 OrderInfoData: TJSONObject;
 begin
@@ -305,6 +452,12 @@ begin
 end;
 
 function TPlumbersResource1.AddOrChangeOrderAndOrderInfo(ARequest: TEndpointRequest): TJSONObject;
+{
+  Описание:
+    Функция, вызывающая функции создания/изменения заказа и создания/изменения информации о заказе.
+  Результат:
+    JSON-объект с ответом сервера в случае успеха, иначе объект с описанием ошибки
+}
 var
 ResponseObject: TJSONObject;
 AddedOrderID, AddedOrderInfoID: integer;
@@ -323,28 +476,153 @@ begin
 
 end;
 
+function TPlumbersResource1.UpdatePlumberOrderStatus(PlumberID: Integer; PlumberStatus: string; OrderID: Integer; OrderStatus: string): TJSONObject;
+{
+  Описание:
+    Функция вызывает нужную хранимую процедуру, передавая туда ID сантехника, ID заказа и их статусы.
+    Причём можно передавать 0 в случае ID и '' в случае статусов, тогда изменения затронут только
+    существующие ID или статусы.
+}
+var
+ResponseObject: TJSONObject;
+UpdateStatus: Boolean;
+begin
+  ResponseObject:= TJSONObject.Create;
+  FDUpdatePlumAndOrderStatus.Prepare;
+  FDUpdatePlumAndOrderStatus.ParamByName('in_order_id').Value:= OrderID;
+  FDUpdatePlumAndOrderStatus.ParamByName('in_order_status').Value:= OrderStatus;
+  FDUpdatePlumAndOrderStatus.ParamByName('in_plumber_id').Value:= PlumberID;
+  FDUpdatePlumAndOrderStatus.ParamByName('in_plumber_status').Value:= PlumberStatus;
+  FDUpdatePlumAndOrderStatus.ExecProc;
+
+  UpdateStatus:= FDUpdatePlumAndOrderStatus.FindParam('out_updated').AsBoolean;
+  if UpdateStatus then Result:= FormJSONResponseMessage('response', 'Status updated')
+  else Result:= FormJSONResponseMessage('error', 'Status was not updated');
+end;
+
 function TPlumbersResource1.AssignPlumberToOrder(ARequest: TEndpointRequest): TJSONObject;
+{
+  Описание:
+    Назначает сантехника на заказ, для этого передаётся ID сантехника, ID заказа и вызывается функция,
+    меняющая статусы сантехнику и заказу.
+  Результат:
+    JSON-объект с ответом сервера в случае успеха, иначе объект с описанием ошибки
+}
 var
 ResponseObject: TJSONObject;
 OrderID, PlumberID: integer;
-Status: string;
+OrderStatus: string;
 begin
   ResponseObject:= TJSONObject.Create;
   if ARequest.Body.TryGetObject(ResponseObject) then begin
-    FDUpdatePlumAndOrderStatus.Prepare;
-    if ResponseObject.TryGetValue('order_id', OrderID) then
-      FDUpdatePlumAndOrderStatus.ParamByName('in_order_id').Value:= OrderID;
-    if ResponseObject.TryGetValue('plumber_id', PlumberID) then
-      FDUpdatePlumAndOrderStatus.ParamByName('in_plumber_id').Value:= PlumberID;
-    if ResponseObject.TryGetValue('status', Status) then
-      FDUpdatePlumAndOrderStatus.ParamByName('in_status').Value:= Status;
-    FDUpdatePlumAndOrderStatus.ExecProc;
-    Result:= FormJSONResponseMessage('response', 'Status updated');
+    if (ResponseObject.TryGetValue('order_id', OrderID)) and
+       (ResponseObject.TryGetValue('plumber_id', PlumberID)) then begin
+        Result:= UpdatePlumberOrderStatus(PlumberID, 'assigned', OrderID, 'assigned');
+        //
+        // вызвать здесь функцию/процедуру, отвечающую за push-уведомления
+        //
+       end
+    else Result:= FormJSONResponseMessage('error', 'Error in parameters');
   end
   else Result:= FormJSONResponseMessage('error', 'JSON expected');
 end;
 
+function TPlumbersResource1.SetDateToPlumbersAssignedOrder(ARequest : TEndpointRequest): TJSONObject;
+{
+  Описание:
+    Функция предназначена для обработки действий сантехника из мобильного приложения, а именно, присвоение
+    дат прочтения, начала и конца выполнения заказа в информацию о заказе.
+  Результат:
+    JSON-объект с ответом сервера в случае успеха, иначе объект с описанием ошибки
+}
+var ResponseObject: TJSONObject;
+OrderID, PlumberID: integer;
+ActionType, ErrorString, ObjectDate: string;
+begin
+
+  if ARequest.Body.TryGetObject(ResponseObject) then begin
+    ResponseObject.TryGetValue('date', ObjectDate);
+    ResponseObject.TryGetValue('order_id', OrderID);
+    ResponseObject.TryGetValue('plumber_id', PlumberID);
+  end
+  else begin
+    Result:= FormJSONResponseMessage('error', 'JSON expected');
+    Exit;
+  end;
+
+  if ARequest.Headers.TryGetValue('action', ActionType) then
+  begin
+    FDAddOrder.Prepare;
+    FDAddOrder.FindParam('in_id').Value:= OrderID;
+
+    if ActionType = 'read' then begin
+      FDAddOrder.FindParam('in_read_date').Value:= ObjectDate;
+      FDAddOrder.FindParam('in_mode').Value:= 1;
+      FDAddOrder.ExecProc;
+      UpdateOrderStatus(OrderID, 'watched');
+      Result:= FormJSONResponseMessage('response', 'Action has correctly executed');
+    end
+    else
+    if ActionType = 'start' then begin
+      FDAddOrder.FindParam('in_begin_date').Value:= ObjectDate;
+      FDAddOrder.FindParam('in_mode').Value:= 2;
+      FDAddOrder.ExecProc;
+      UpdateOrderStatus(OrderID, 'processing');
+      UpdatePlumberStatus(PlumberID, 'working');
+      Result:= FormJSONResponseMessage('response', 'Action has correctly executed');
+    end
+    else
+    if ActionType = 'end' then begin
+      FDAddOrder.FindParam('in_end_date').Value:= ObjectDate;
+      FDAddOrder.FindParam('in_mode').Value:= 3;
+      FDAddOrder.ExecProc;
+      UpdateOrderStatus(OrderID, 'completed');
+      UpdatePlumberStatus(PlumberID, 'online');
+      Result:= FormJSONResponseMessage('response', 'Action has correctly executed');
+    end
+    else Result:= FormJSONResponseMessage('error', 'Unknown action type');
+
+
+  end
+  else Result:= FormJSONResponseMessage('error', 'Missing action parameter');
+end;
+
+function TPlumbersResource1.DisconnectPlumber(ARequest: TEndpointRequest): TJSONObject;
+{
+  Описание:
+    Функция предназначена для обработки выхода сантехника из сети
+  Результат:
+    JSON-объект с ответом сервера в случае успеха, иначе объект с описанием ошибки
+}
+var
+ResponseObject: TJSONObject;
+PlumberID: integer;
+PlumberOrderStatus: string;
+begin
+  if ARequest.Body.TryGetObject(ResponseObject) then begin
+    if ResponseObject.TryGetValue('plumber_id', PlumberID) and
+      ResponseObject.TryGetValue('status', PlumberOrderStatus) then
+        if PlumberOrderStatus = 'online' then begin
+          UpdatePlumberStatus(PlumberID, 'offline');
+          Result:= FormJSONResponseMessage('response', 'Plumber has disconnected');
+        end
+        else Result:= FormJSONResponseMessage('response', 'Cant set plumber offline')
+    else Result:= FormJSONResponseMessage('error', 'Incorrect parameters');
+  end
+  else Result:= FormJSONResponseMessage('error', 'JSON expected');
+end;
+
+function TPlumbersResource1.test(ARequest: TEndpointRequest): TJSONObject;
+begin
+
+end;
+
 procedure TPlumbersResource1.Get(const AContext: TEndpointContext; const ARequest: TEndpointRequest; const AResponse: TEndpointResponse);
+{
+  Описание:
+    Здесь происходит обработка вызовов эндпоинтов GET, а именно, обработка авторизации
+    сантехников или операторов, получение нужной информации из базы при авторизации
+}
 var JSONResponse: TJSONObject;
 QueryTask: string;
 begin
@@ -357,6 +635,12 @@ begin
 end;
 
 procedure TPlumbersResource1.Post(const AContext: TEndpointContext; const ARequest: TEndpointRequest; const AResponse: TEndpointResponse);
+{
+  Описание:
+    Здесь происходит обработка вызовов эндпоинтов POST, а именно, регистрация снтехников/операторов,
+    создание и изменение заказа и информации о нём, назначение сантехника на заказ,
+    обработка действий мобильного приложения, а также выход из него
+}
 var JSONResponse: TJSONObject;
 QueryTask: string;
 begin
@@ -366,6 +650,8 @@ begin
   if QueryTask = 'reg' then JSONResponse:= RegisterAccount(ARequest);
   if QueryTask = 'order' then  JSONResponse:= AddOrChangeOrderAndOrderInfo(ARequest);
   if QueryTask = 'assign' then JSONResponse:= AssignPlumberToOrder(ARequest);
+  if QueryTask = 'action' then JSONResponse:= SetDateToPlumbersAssignedOrder(ARequest);
+  if QueryTask = 'disconnect' then JSONResponse:= DisconnectPlumber(ARequest);
 
   AResponse.Body.SetValue(JSONResponse, True);
 end;
