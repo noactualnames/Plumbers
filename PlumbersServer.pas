@@ -155,7 +155,11 @@ begin
       begin
         columnName:= FDQuery.FieldDefs[I].Name;
         if (FDQuery.FieldByName(columnName).DataType = ftInteger)
-        or (FDQuery.FieldByName(columnName).DataType = ftFloat) then
+        or (FDQuery.FieldByName(columnName).DataType = ftFloat)
+        or (FDQuery.FieldByName(columnName).DataType = ftLargeint)
+        or (FDQuery.FieldByName(columnName).DataType = ftLongWord)
+        or (FDQuery.FieldByName(columnName).DataType = ftExtended)
+        or (FDQuery.FieldByName(columnName).DataType = ftWord) then
             dbRow.AddPair(columnName,
                           TJSONNumber.Create(FDQuery.FieldByName(columnName).AsString))
         else
@@ -319,11 +323,11 @@ AccountData: TJSONObject;
 Name, Login, Password, AuthModeStr: string;
 StoredProc: TFDStoredProc;
 begin
-  ARequest.Headers.TryGetValue('mode', AuthModeStr);
-  AuthMode:= StrToInt(AuthModeStr);
-  AccountData:= TJSONObject.Create;
-  if ARequest.Body.TryGetObject(AccountData) then begin
+  Result:= TJSONObject.Create;
+    if ARequest.Body.TryGetObject(AccountData) then begin
       Login:= AccountData.GetValue('login').Value;
+      AuthModeStr:= AccountData.GetValue('mode').Value;
+      AuthMode:= StrToInt(AuthModeStr);
       if not CheckAccountLoginExists(Login, AuthMode) then begin
         Name:= AccountData.GetValue('name').Value;
 
@@ -350,8 +354,8 @@ begin
         Result:= FormJSONResponseMessage('response', 'Registration made successfully');
       end
       else Result:= FormJSONResponseMessage('error', 'This login is already used');
-  end
-  else Result:= FormJSONResponseMessage('error', 'JSON expected');
+    end
+    else Result:= FormJSONResponseMessage('error', 'JSON expected');
 end;
 
 procedure TPlumbersResource1.SetOperatorEditStatus(CreatorOpID: integer; EditorOpID: integer);
@@ -472,7 +476,8 @@ begin
       Result:= FormJSONResponseMessage('response', 'New Data added')
     else
       Result:= FormJSONResponseMessage('error', 'Something went wrong');
-  end;
+  end
+  else Result:= FormJSONResponseMessage('error', 'JSON expected');
 
 end;
 
@@ -544,14 +549,13 @@ begin
     ResponseObject.TryGetValue('date', ObjectDate);
     ResponseObject.TryGetValue('order_id', OrderID);
     ResponseObject.TryGetValue('plumber_id', PlumberID);
+    ResponseObject.TryGetValue('action', ActionType);
   end
   else begin
     Result:= FormJSONResponseMessage('error', 'JSON expected');
     Exit;
   end;
 
-  if ARequest.Headers.TryGetValue('action', ActionType) then
-  begin
     FDAddOrder.Prepare;
     FDAddOrder.FindParam('in_id').Value:= OrderID;
 
@@ -582,9 +586,6 @@ begin
     end
     else Result:= FormJSONResponseMessage('error', 'Unknown action type');
 
-
-  end
-  else Result:= FormJSONResponseMessage('error', 'Missing action parameter');
 end;
 
 function TPlumbersResource1.DisconnectPlumber(ARequest: TEndpointRequest): TJSONObject;
@@ -627,7 +628,7 @@ var JSONResponse: TJSONObject;
 QueryTask: string;
 begin
   JSONResponse:= TJSONObject.Create;
-  ARequest.Headers.TryGetValue('task', QueryTask);
+  ARequest.Params.TryGetValue('task', QueryTask);
 
   if QueryTask = 'auth' then JSONResponse:= AuthAccount(ARequest);
 
@@ -642,16 +643,21 @@ procedure TPlumbersResource1.Post(const AContext: TEndpointContext; const AReque
     обработка действий мобильного приложения, а также выход из него
 }
 var JSONResponse: TJSONObject;
+DataObject: TJSONObject;
 QueryTask: string;
 begin
   JSONResponse:= TJSONObject.Create;
-  ARequest.Headers.TryGetValue('task', QueryTask);
-
-  if QueryTask = 'reg' then JSONResponse:= RegisterAccount(ARequest);
-  if QueryTask = 'order' then  JSONResponse:= AddOrChangeOrderAndOrderInfo(ARequest);
-  if QueryTask = 'assign' then JSONResponse:= AssignPlumberToOrder(ARequest);
-  if QueryTask = 'action' then JSONResponse:= SetDateToPlumbersAssignedOrder(ARequest);
-  if QueryTask = 'disconnect' then JSONResponse:= DisconnectPlumber(ARequest);
+  if ARequest.Body.TryGetObject(DataObject) then begin
+    if DataObject.TryGetValue('task', QueryTask) then begin
+      if QueryTask = 'reg' then JSONResponse:= RegisterAccount(ARequest);
+      if QueryTask = 'order' then  JSONResponse:= AddOrChangeOrderAndOrderInfo(ARequest);
+      if QueryTask = 'assign' then JSONResponse:= AssignPlumberToOrder(ARequest);
+      if QueryTask = 'action' then JSONResponse:= SetDateToPlumbersAssignedOrder(ARequest);
+      if QueryTask = 'disconnect' then JSONResponse:= DisconnectPlumber(ARequest);
+    end
+    else JSONResponse:= FormJSONResponseMessage('error', 'Missing task parameter');
+  end
+  else JSONResponse:= FormJSONResponseMessage('error', 'JSON expected');
 
   AResponse.Body.SetValue(JSONResponse, True);
 end;
