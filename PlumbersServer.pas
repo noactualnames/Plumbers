@@ -37,8 +37,8 @@ type
 
     function GetDbData(FDQuery: TFDQuery): TJSONObject;
     function GetAllDBData(): TJSONObject;
-    procedure UpdatePlumberStatus(PlumberID: integer; Status: string);
-    procedure UpdateOrderStatus(OrderID: integer; Status: string);
+    procedure UpdatePlumberStatus(PlumberID: integer; Status: string; UpdateMode: Integer);
+    procedure UpdateOrderStatus(OrderID: integer; Status: string; UpdateMode: Integer);
     function GetPlumbersAssignedOrder(PlumberID : integer) : TJSONObject;
     function SetDateToPlumbersAssignedOrder(ARequest : TEndpointRequest): TJSONObject;
 
@@ -55,7 +55,7 @@ type
     function AddOrChangeOrderInfo(ResponseObject: TJSONObject; AddedOrderID: integer) : integer;
     function AddOrChangeOrderAndOrderInfo(ARequest: TEndpointRequest): TJSONObject;
 
-    function UpdatePlumberOrderStatus(PlumberID: Integer; PlumberStatus: string; OrderID: Integer; OrderStatus: string): TJSONObject;
+    function UpdatePlumberOrderStatus(PlumberID: Integer; PlumberStatus: string; OrderID: Integer; OrderStatus: string; UpdateMode: Integer): TJSONObject;
     function AssignPlumberToOrder(ARequest: TEndpointRequest): TJSONObject;
     function DisconnectPlumber(ARequest: TEndpointRequest): TJSONObject;
 
@@ -175,7 +175,7 @@ begin
     Result:= mainContainer;
 end;
 
-procedure TPlumbersResource1.UpdatePlumberStatus(PlumberID: integer; Status: string);
+procedure TPlumbersResource1.UpdatePlumberStatus(PlumberID: integer; Status: string; UpdateMode: Integer);
 {
   Описание:
     Присваивает переданный статус сантехнику с переданным ID
@@ -184,10 +184,11 @@ begin
   FDUpdatePlumAndOrderStatus.Prepare;
   FDUpdatePlumAndOrderStatus.ParamByName('in_plumber_id').Value:= PlumberID;
   FDUpdatePlumAndOrderStatus.ParamByName('in_plumber_status').Value:= Status;
+  FDUpdatePlumAndOrderStatus.ParamByName('in_add_mode').Value:= UpdateMode;
   FDUpdatePlumAndOrderStatus.ExecProc;
 end;
 
-procedure TPlumbersResource1.UpdateOrderStatus(OrderID: integer; Status: string);
+procedure TPlumbersResource1.UpdateOrderStatus(OrderID: integer; Status: string; UpdateMode: Integer);
 {
   Описание:
     Присваивает переданный статус заказу с переданным ID
@@ -196,6 +197,7 @@ begin
   FDUpdatePlumAndOrderStatus.Prepare;
   FDUpdatePlumAndOrderStatus.ParamByName('in_order_id').Value:= OrderID;
   FDUpdatePlumAndOrderStatus.ParamByName('in_order_status').Value:= Status;
+  FDUpdatePlumAndOrderStatus.ParamByName('in_add_mode').Value:= UpdateMode;
   FDUpdatePlumAndOrderStatus.ExecProc;
 end;
 
@@ -207,7 +209,6 @@ function TPlumbersResource1.GetPlumbersAssignedOrder(PlumberID : integer) : TJSO
 }
 var
 OrderID: integer;
-OrderStatus: string;
 begin
   Result:= TJSONObject.Create;
   FDGetAssignedOrder.Prepare;
@@ -216,20 +217,16 @@ begin
 
   if FDGetAssignedOrder.FindParam('out_assigned').AsBoolean then begin
     OrderID:= FDGetAssignedOrder.FindParam('out_order_id').AsInteger;
-    OrderStatus:= FDGetAssignedOrder.FindParam('out_order_status').AsString;
-
-    if (OrderStatus = 'assigned') or (OrderStatus = 'watched') then
-      UpdatePlumberStatus(PlumberID, 'assigned');
-    if OrderStatus = 'processing' then UpdatePlumberStatus(PlumberID, 'working');
 
     FDSelectOneOrder.ParamByName('in_id').Value:= OrderID;
     FDSelectOneOrderInfo.ParamByName('in_id').Value:= OrderID;
 
     Result.AddPair('order', GetDbData(FDSelectOneOrder));
     Result.AddPair('order_info', GetDbData(FDSelectOneOrderInfo));
+    Result.AddPair('order_id', TJSONNumber.Create(OrderID));
   end
   else begin
-    UpdatePlumberStatus(PlumberID, 'online');
+    UpdatePlumberStatus(PlumberID, 'online', 3);
     Result.AddPair('order_id', TJSONNumber.Create(0));
   end;
 end;
@@ -418,7 +415,7 @@ begin
       PlumberID:= OrderData.GetValue('order_plumber_id').Value.ToInteger;
       if PlumberID = 0 then begin
         FDAddOrder.ParamByName('in_status').Value:= 'free';
-        UpdatePlumberStatus(PlumberID, 'offline');
+        UpdatePlumberStatus(PlumberID, 'offline', 3);
       end;
       FDAddOrder.ParamByName('in_plumber_id').Value:= PlumberID;
       FDAddOrder.ExecProc;
@@ -481,7 +478,7 @@ begin
 
 end;
 
-function TPlumbersResource1.UpdatePlumberOrderStatus(PlumberID: Integer; PlumberStatus: string; OrderID: Integer; OrderStatus: string): TJSONObject;
+function TPlumbersResource1.UpdatePlumberOrderStatus(PlumberID: Integer; PlumberStatus: string; OrderID: Integer; OrderStatus: string; UpdateMode: Integer): TJSONObject;
 {
   Описание:
     Функция вызывает нужную хранимую процедуру, передавая туда ID сантехника, ID заказа и их статусы.
@@ -498,6 +495,7 @@ begin
   FDUpdatePlumAndOrderStatus.ParamByName('in_order_status').Value:= OrderStatus;
   FDUpdatePlumAndOrderStatus.ParamByName('in_plumber_id').Value:= PlumberID;
   FDUpdatePlumAndOrderStatus.ParamByName('in_plumber_status').Value:= PlumberStatus;
+  FDUpdatePlumAndOrderStatus.ParamByName('in_add_mode').Value:= UpdateMode;
   FDUpdatePlumAndOrderStatus.ExecProc;
 
   UpdateStatus:= FDUpdatePlumAndOrderStatus.FindParam('out_updated').AsBoolean;
@@ -522,7 +520,7 @@ begin
   if ARequest.Body.TryGetObject(ResponseObject) then begin
     if (ResponseObject.TryGetValue('order_id', OrderID)) and
        (ResponseObject.TryGetValue('plumber_id', PlumberID)) then begin
-        Result:= UpdatePlumberOrderStatus(PlumberID, 'assigned', OrderID, 'assigned');
+        Result:= UpdatePlumberOrderStatus(PlumberID, 'assigned', OrderID, 'assigned', 1);
         //
         // вызвать здесь функцию/процедуру, отвечающую за push-уведомления
         //
@@ -563,7 +561,7 @@ begin
       FDAddOrder.FindParam('in_read_date').Value:= ObjectDate;
       FDAddOrder.FindParam('in_mode').Value:= 1;
       FDAddOrder.ExecProc;
-      UpdateOrderStatus(OrderID, 'watched');
+      UpdateOrderStatus(OrderID, 'watched', 2);
       Result:= FormJSONResponseMessage('response', 'Action has correctly executed');
     end
     else
@@ -571,8 +569,8 @@ begin
       FDAddOrder.FindParam('in_begin_date').Value:= ObjectDate;
       FDAddOrder.FindParam('in_mode').Value:= 2;
       FDAddOrder.ExecProc;
-      UpdateOrderStatus(OrderID, 'processing');
-      UpdatePlumberStatus(PlumberID, 'working');
+      UpdateOrderStatus(OrderID, 'processing', 2);
+      UpdatePlumberStatus(PlumberID, 'working', 3);
       Result:= FormJSONResponseMessage('response', 'Action has correctly executed');
     end
     else
@@ -580,8 +578,8 @@ begin
       FDAddOrder.FindParam('in_end_date').Value:= ObjectDate;
       FDAddOrder.FindParam('in_mode').Value:= 3;
       FDAddOrder.ExecProc;
-      UpdateOrderStatus(OrderID, 'completed');
-      UpdatePlumberStatus(PlumberID, 'online');
+      UpdateOrderStatus(OrderID, 'completed', 2);
+      UpdatePlumberStatus(PlumberID, 'online', 3);
       Result:= FormJSONResponseMessage('response', 'Action has correctly executed');
     end
     else Result:= FormJSONResponseMessage('error', 'Unknown action type');
@@ -604,7 +602,7 @@ begin
     if ResponseObject.TryGetValue('plumber_id', PlumberID) and
       ResponseObject.TryGetValue('status', PlumberOrderStatus) then
         if PlumberOrderStatus = 'online' then begin
-          UpdatePlumberStatus(PlumberID, 'offline');
+          UpdatePlumberStatus(PlumberID, 'offline', 3);
           Result:= FormJSONResponseMessage('response', 'Plumber has disconnected');
         end
         else Result:= FormJSONResponseMessage('response', 'Cant set plumber offline')
