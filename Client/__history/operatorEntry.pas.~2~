@@ -1,0 +1,44 @@
+unit operatorEntry;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, IdBaseComponent, IdComponent,
+  IdTCPConnection, IdTCPClient, IdHTTP, Vcl.StdCtrls;
+
+type
+  TForm1 = class(TForm)
+    Label1: TLabel;
+    Label2: TLabel;
+    Label3: TLabel;
+    eLogin: TEdit;
+    ePassword: TEdit;
+    btnEntry: TButton;
+    IdHTTP1: TIdHTTP;
+    procedure btnEntryClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form1: TForm1;
+
+implementation
+
+{$R *.dfm}
+
+procedure TForm1.btnEntryClick(Sender: TObject);
+var url,login,password, result: string;
+
+begin
+   login:=eLogin.Text;
+   password:=ePassword.Text;
+   url:='http://localhost:8080/Plumbers&task=auth&mode=1?login='+login+'&password='+password;
+    result:=IdHTTP1.Get()
+
+end;
+
+end.
