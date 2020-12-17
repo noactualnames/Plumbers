@@ -61,13 +61,12 @@ object TOrderInfo: TTOrderInfo
     Height = 13
     Caption = #1040#1076#1088#1077#1089
   end
-  object Edit1: TEdit
-    Left = 120
+  object eOrderType: TEdit
+    Left = 128
     Top = 82
     Width = 289
-    Height = 23
+    Height = 21
     TabOrder = 0
-    Text = 'Edit1'
   end
   object btnAddCustomer: TButton
     Left = 184
@@ -77,28 +76,32 @@ object TOrderInfo: TTOrderInfo
     Caption = #1044#1086#1073#1072#1074#1080#1090#1100' '#1079#1072#1082#1072#1079
     TabOrder = 1
   end
-  object Edit2: TEdit
-    Left = 120
+  object eOrderDescroption: TEdit
+    Left = 128
     Top = 120
     Width = 289
-    Height = 56
+    Height = 21
     TabOrder = 2
-    Text = 'Edit2'
   end
-  object Edit4: TEdit
-    Left = 120
-    Top = 195
+  object eOrderPrice: TEdit
+    Left = 128
+    Top = 160
     Width = 289
     Height = 21
     TabOrder = 3
-    Text = 'Edit4'
   end
-  object Edit5: TEdit
-    Left = 120
+  object eOrderPhone: TEdit
+    Left = 128
     Top = 232
     Width = 289
     Height = 21
     TabOrder = 4
-    Text = 'Edit5'
+  end
+  object eOrderAddress: TEdit
+    Left = 128
+    Top = 195
+    Width = 289
+    Height = 21
+    TabOrder = 5
   end
 end

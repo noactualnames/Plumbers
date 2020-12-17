@@ -103,11 +103,20 @@
             <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="mainWindow.pas">
-            <Form>TMainWindow</Form>
+            <Form>fmMainWindow</Form>
             <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="orderInfo.pas">
             <Form>TOrderInfo</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="dm.pas">
+            <Form>DataModule1</Form>
+            <FormType>dfm</FormType>
+            <DesignClass>TDataModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="errorLogin.pas">
+            <Form>fmErrorLogin</Form>
             <FormType>dfm</FormType>
         </DCCReference>
         <BuildConfiguration Include="Release">

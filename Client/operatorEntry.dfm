@@ -2,8 +2,8 @@ object TOperatorEntry: TTOperatorEntry
   Left = 0
   Top = 0
   Caption = 'TOperatorEntry'
-  ClientHeight = 215
-  ClientWidth = 266
+  ClientHeight = 216
+  ClientWidth = 261
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -14,7 +14,7 @@ object TOperatorEntry: TTOperatorEntry
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
-    Left = 112
+    Left = 128
     Top = 24
     Width = 36
     Height = 21
@@ -41,7 +41,7 @@ object TOperatorEntry: TTOperatorEntry
     Caption = #1051#1086#1075#1080#1085
   end
   object eLogin: TEdit
-    Left = 85
+    Left = 76
     Top = 72
     Width = 121
     Height = 21
@@ -49,7 +49,7 @@ object TOperatorEntry: TTOperatorEntry
     TabOrder = 0
   end
   object ePassword: TEdit
-    Left = 85
+    Left = 76
     Top = 115
     Width = 121
     Height = 21
@@ -64,25 +64,5 @@ object TOperatorEntry: TTOperatorEntry
     Caption = #1042#1086#1081#1090#1080
     TabOrder = 2
     OnClick = btnEntryClick
-  end
-  object IdHTTP1: TIdHTTP
-    ProxyParams.BasicAuthentication = False
-    ProxyParams.ProxyPort = 0
-    Request.ContentLength = -1
-    Request.ContentRangeEnd = -1
-    Request.ContentRangeStart = -1
-    Request.ContentRangeInstanceLength = -1
-    Request.Accept = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-    Request.BasicAuthentication = False
-    Request.UserAgent = 'Mozilla/3.0 (compatible; Indy Library)'
-    Request.Ranges.Units = 'bytes'
-    Request.Ranges = <>
-    HTTPOptions = [hoForceEncodeParams]
-    Left = 216
-    Top = 16
-  end
-  object FDQuery1: TFDQuery
-    Left = 8
-    Top = 32
   end
 end

@@ -8,7 +8,9 @@ uses
   IdTCPConnection, IdTCPClient, IdHTTP, Vcl.StdCtrls, FireDAC.Stan.Intf,
   FireDAC.Stan.Option, FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS,
   FireDAC.Phys.Intf, FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt,
-  Data.DB, FireDAC.Comp.DataSet, FireDAC.Comp.Client, System.JSON;
+  Data.DB, FireDAC.Comp.DataSet, FireDAC.Comp.Client, System.JSON,
+  REST.Backend.ServiceTypes, REST.Client, REST.Backend.EndPoint,
+  Data.Bind.Components, Data.Bind.ObjectScope;
 
 type
   TTOperatorEntry = class(TForm)
@@ -18,11 +20,13 @@ type
     eLogin: TEdit;
     ePassword: TEdit;
     btnEntry: TButton;
-    IdHTTP1: TIdHTTP;
-    FDQuery1: TFDQuery;
     procedure btnEntryClick(Sender: TObject);
   private
     { Private declarations }
+    UserValue:integer;
+    UserData:string;
+    ChangesUserObject:TJSONArray;
+    ChangesDataObject:TJSONArray;
   public
     { Public declarations }
 
@@ -35,23 +39,30 @@ implementation
 
 {$R *.dfm}
 
+uses dm, errorLogin, mainWindow;
+
 procedure TTOperatorEntry.btnEntryClick(Sender: TObject);
-var url,login,password: string;
-    resultJSON:TJSONObject;
-    resultJSONArray: TJSONArray;
+var login, password:string;
+     responseJSON:string;
 begin
-   login:=eLogin.Text;
-   password:=ePassword.Text;
-   url:='http://localhost:8080/Plumbers&task=auth&mode=1?login='+login+'&password='+password;
+  login:=eLogin.Text;
+  password:=ePassword.Text;
+  dm.DataModule1.BackendEndpoint1.Params.ParameterByName('login').AddValue(login); //добавляем значение в параметры запроса
+  dm.DataModule1.BackendEndpoint1.Params.ParameterByName('password').AddValue(password);
+  dm.DataModule1.BackendEndpoint1.Execute;
 
-    resultJSON:=TJSONObject.Create;
-    resultJSONArray:=TJSONArray.Create;
-    resultJSON:=TJSONObject.ParseJSONValue(IdHTTP1.Get(url)) as TJSONObject;
-     try
 
-     finally
 
-     end;
+  if responseJSON.Length<40 then begin
+
+    fmErrorLogin:=TfmErrorLogin.Create(Application);
+    fmErrorLogin.ShowModal;
+    fmErrorLogin.Release;
+  end else begin
+    fmMainWindow:=TfmMainWindow.Create(Application);
+    fmMainWindow.ShowModal;
+    fmMainWindow.Release;
+  end;
 
 
 

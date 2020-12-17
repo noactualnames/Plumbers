@@ -1,7 +1,7 @@
-object TMainWindow: TTMainWindow
+object fmMainWindow: TfmMainWindow
   Left = 0
   Top = 0
-  Caption = 'TMainWindow'
+  Caption = 'fmMainWindow'
   ClientHeight = 614
   ClientWidth = 937
   Color = clBtnFace
@@ -20,7 +20,6 @@ object TMainWindow: TTMainWindow
     Height = 41
     Align = alTop
     TabOrder = 0
-    ExplicitWidth = 185
     object btnAddOrder: TButton
       Left = 32
       Top = 8
@@ -39,12 +38,43 @@ object TMainWindow: TTMainWindow
       TabOrder = 1
     end
   end
-  object Panel2: TPanel
-    Left = 696
-    Top = 47
-    Width = 241
-    Height = 394
-    Caption = 'Panel2'
+  object DBGrid2: TDBGrid
+    Left = 96
+    Top = 254
+    Width = 320
+    Height = 120
+    DataSource = DataModule1.dsOrders
     TabOrder = 1
+    TitleFont.Charset = DEFAULT_CHARSET
+    TitleFont.Color = clWindowText
+    TitleFont.Height = -11
+    TitleFont.Name = 'Tahoma'
+    TitleFont.Style = []
+  end
+  object DBGrid3: TDBGrid
+    Left = 96
+    Top = 424
+    Width = 320
+    Height = 120
+    DataSource = DataModule1.dsOrdersInfo
+    TabOrder = 2
+    TitleFont.Charset = DEFAULT_CHARSET
+    TitleFont.Color = clWindowText
+    TitleFont.Height = -11
+    TitleFont.Name = 'Tahoma'
+    TitleFont.Style = []
+  end
+  object DBGrid1: TDBGrid
+    Left = 96
+    Top = 94
+    Width = 320
+    Height = 120
+    DataSource = DataModule1.dsPlumbers
+    TabOrder = 3
+    TitleFont.Charset = DEFAULT_CHARSET
+    TitleFont.Color = clWindowText
+    TitleFont.Height = -11
+    TitleFont.Name = 'Tahoma'
+    TitleFont.Style = []
   end
 end

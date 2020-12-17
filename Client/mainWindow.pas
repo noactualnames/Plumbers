@@ -4,14 +4,17 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Data.DB,
+  Vcl.Grids, Vcl.DBGrids;
 
 type
-  TTMainWindow = class(TForm)
+  TfmMainWindow = class(TForm)
     Panel1: TPanel;
     btnAddOrder: TButton;
     btnExit: TButton;
-    Panel2: TPanel;
+    DBGrid2: TDBGrid;
+    DBGrid3: TDBGrid;
+    DBGrid1: TDBGrid;
     procedure btnAddOrderClick(Sender: TObject);
   private
     { Private declarations }
@@ -20,15 +23,15 @@ type
   end;
 
 var
-  TMainWindow: TTMainWindow;
+  fmMainWindow: TfmMainWindow;
 
 implementation
 
 {$R *.dfm}
 
-uses orderInfo;
+uses orderInfo, dm;
 
-procedure TTMainWindow.btnAddOrderClick(Sender: TObject);
+procedure TfmMainWindow.btnAddOrderClick(Sender: TObject);
 begin
  TOrderInfo:=TTOrderInfo.Create(Application);
  TOrderInfo.ShowModal;

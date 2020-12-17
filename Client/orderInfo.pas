@@ -8,17 +8,18 @@ uses
 
 type
   TTOrderInfo = class(TForm)
-    Edit1: TEdit;
+    eOrderType: TEdit;
     Label1: TLabel;
     btnAddCustomer: TButton;
-    Edit2: TEdit;
-    Edit4: TEdit;
-    Edit5: TEdit;
+    eOrderDescroption: TEdit;
+    eOrderPrice: TEdit;
+    eOrderPhone: TEdit;
     Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
     Label5: TLabel;
     Label6: TLabel;
+    eOrderAddress: TEdit;
   private
     { Private declarations }
   public
