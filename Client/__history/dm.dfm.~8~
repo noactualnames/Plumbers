@@ -57,22 +57,7 @@ object DataModule1: TDataModule1
         Size = 20
       end>
     IndexDefs = <>
-    Params = <
-      item
-        DataType = ftInteger
-        Name = 'PLUMBER_ID'
-        ParamType = ptUnknown
-      end
-      item
-        DataType = ftString
-        Name = 'PLUMBER_STATUS'
-        ParamType = ptUnknown
-      end
-      item
-        DataType = ftString
-        Name = 'PLUMBER_NAME'
-        ParamType = ptUnknown
-      end>
+    Params = <>
     StoreDefs = True
     Left = 88
     Top = 280
