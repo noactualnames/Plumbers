@@ -12,16 +12,16 @@ type
   TDataModule1 = class(TDataModule)
     EMSProvider1: TEMSProvider;
     BackendEndpoint1: TBackendEndpoint;
-    AdapterPlumbers: TRESTResponseDataSetAdapter;
     dsetPlumbers: TClientDataSet;
-    AdapterOrders: TRESTResponseDataSetAdapter;
-    AdapterOrdersInfo: TRESTResponseDataSetAdapter;
     dsetOrders: TClientDataSet;
     dsetOrdersInfo: TClientDataSet;
     dsPlumbers: TDataSource;
     dsOrders: TDataSource;
     dsOrdersInfo: TDataSource;
     RESTResponseGet: TRESTResponse;
+    AdapterPlumbers: TRESTResponseDataSetAdapter;
+    AdapterOrders: TRESTResponseDataSetAdapter;
+    AdapterOrdersInfo: TRESTResponseDataSetAdapter;
   private
     { Private declarations }
   public
