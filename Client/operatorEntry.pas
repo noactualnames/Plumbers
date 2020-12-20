@@ -20,7 +20,6 @@ type
     eLogin: TEdit;
     ePassword: TEdit;
     btnEntry: TButton;
-    IdHTTP1: TIdHTTP;
     procedure btnEntryClick(Sender: TObject);
   private
     { Private declarations }
@@ -30,7 +29,7 @@ type
     ChangesDataObject:TJSONArray;
   public
     { Public declarations }
-
+      opID:integer;
   end;
 
 var
@@ -57,18 +56,22 @@ begin
   login:=eLogin.Text;
   password:=ePassword.Text;
 
-
   dm.DataModule1.BackendEndpoint1.AddParameter('task','auth');
   dm.DataModule1.BackendEndpoint1.AddParameter('mode','1');
   dm.DataModule1.BackendEndpoint1.AddParameter('login', login);
   dm.DataModule1.BackendEndpoint1.AddParameter('password',password);
   dm.DataModule1.BackendEndpoint1.Execute;
-    s:=dm.DataModule1.RESTResponseGet.Content;
+  s:=dm.DataModule1.RESTResponseGet.Content;
 
   if (s.Length>45) then  begin
-  fmMainWindow:=TfmMainWindow.Create(Application);
-  fmMainWindow.ShowModal;
-  fmMainWindow.Release;
+   responseJSON:=TJSONObject.ParseJSONValue(s) as TJSONObject;
+      opID:=responseJSON.GetValue<integer>('ID');
+
+      fmMainWindow:=TfmMainWindow.Create(Application);
+      fmMainWindow.ShowModal;
+      fmMainWindow.Release;
+      close;
+
 //
 //       responseJSON:=TJSONObject.ParseJSONValue(s) as TJSONObject;
 //
@@ -99,9 +102,7 @@ begin
 
   end else begin
 
-    fmErrorLogin:=TfmErrorLogin.Create(Application);
-    fmErrorLogin.ShowModal;
-    fmErrorLogin.Release;
+    MessageDlg('Неправильный логин или пароль',mtError, mbOKCancel, 0);
 
     end;
 end;

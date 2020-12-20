@@ -75,6 +75,7 @@ object TOrderInfo: TTOrderInfo
     Height = 25
     Caption = #1044#1086#1073#1072#1074#1080#1090#1100' '#1079#1072#1082#1072#1079
     TabOrder = 1
+    OnClick = btnAddCustomerClick
   end
   object eOrderDescroption: TEdit
     Left = 128

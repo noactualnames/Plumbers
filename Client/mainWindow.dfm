@@ -39,10 +39,10 @@ object fmMainWindow: TfmMainWindow
     end
   end
   object DBGrid2: TDBGrid
-    Left = 96
-    Top = 254
-    Width = 320
-    Height = 120
+    Left = 0
+    Top = 39
+    Width = 705
+    Height = 306
     DataSource = DataModule1.dsOrders
     TabOrder = 1
     TitleFont.Charset = DEFAULT_CHARSET
@@ -51,12 +51,12 @@ object fmMainWindow: TfmMainWindow
     TitleFont.Name = 'Tahoma'
     TitleFont.Style = []
   end
-  object DBGrid3: TDBGrid
-    Left = 96
-    Top = 424
-    Width = 320
-    Height = 120
-    DataSource = DataModule1.dsOrdersInfo
+  object DBGrid1: TDBGrid
+    Left = 704
+    Top = 39
+    Width = 233
+    Height = 578
+    DataSource = DataModule1.dsPlumbers
     TabOrder = 2
     TitleFont.Charset = DEFAULT_CHARSET
     TitleFont.Color = clWindowText
@@ -64,12 +64,12 @@ object fmMainWindow: TfmMainWindow
     TitleFont.Name = 'Tahoma'
     TitleFont.Style = []
   end
-  object DBGrid1: TDBGrid
-    Left = 96
-    Top = 94
-    Width = 320
-    Height = 120
-    DataSource = DataModule1.dsPlumbers
+  object DBGrid3: TDBGrid
+    Left = 0
+    Top = 344
+    Width = 705
+    Height = 273
+    DataSource = DataModule1.dsOrdersInfo
     TabOrder = 3
     TitleFont.Charset = DEFAULT_CHARSET
     TitleFont.Color = clWindowText

@@ -35,7 +35,7 @@ end;
 procedure TfmErrorLogin.FormActivate(Sender: TObject);
 begin
 
-lError.Caption:=dm.DataModule1.RESTResponseGet.Content;
+lError.Caption:='Неправильный логин или пароль';
 
 end;
 

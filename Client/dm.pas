@@ -22,6 +22,8 @@ type
     AdapterPlumbers: TRESTResponseDataSetAdapter;
     AdapterOrders: TRESTResponseDataSetAdapter;
     AdapterOrdersInfo: TRESTResponseDataSetAdapter;
+    BackendEndpoint2: TBackendEndpoint;
+    RESTResponsePost: TRESTResponse;
   private
     { Private declarations }
   public

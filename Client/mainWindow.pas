@@ -13,8 +13,8 @@ type
     btnAddOrder: TButton;
     btnExit: TButton;
     DBGrid2: TDBGrid;
-    DBGrid3: TDBGrid;
     DBGrid1: TDBGrid;
+    DBGrid3: TDBGrid;
     procedure btnAddOrderClick(Sender: TObject);
   private
     { Private declarations }
@@ -36,6 +36,8 @@ begin
  TOrderInfo:=TTOrderInfo.Create(Application);
  TOrderInfo.ShowModal;
  TOrderInfo.Release;
+
+
 end;
 
 end.

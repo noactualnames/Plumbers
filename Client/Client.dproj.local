@@ -1,23 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <BorlandProject>
 	<Transactions>
-    <Transaction>1899.12.30 00:00:00.000.629,C:\Users\Diana\Documents\Embarcadero\Studio\Projects\Project1.dproj=C:\Users\Diana\Documents\Embarcadero\Studio\Projects\Client.dproj</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.179,=C:\Users\Diana\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.063,C:\Users\Diana\Documents\Embarcadero\Studio\Projects\Unit1.pas=C:\Users\Diana\Documents\Embarcadero\Studio\Projects\operatorEntry.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.227,C:\Users\Diana\Plumbers\Client\Unit1.dfm=C:\Users\Diana\Plumbers\Client\dataModul.dfm</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.435,=C:\Users\Diana\Documents\Embarcadero\Studio\Projects\Unit3.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.222,C:\Users\Diana\Documents\Embarcadero\Studio\Projects\orderInfo.pas=C:\Users\Diana\Documents\Embarcadero\Studio\Projects\Unit3.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.488,C:\Users\Diana\Documents\Embarcadero\Studio\Projects\mainWindow.dfm=C:\Users\Diana\Documents\Embarcadero\Studio\Projects\Unit2.dfm</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.488,C:\Users\Diana\Documents\Embarcadero\Studio\Projects\mainWindow.pas=C:\Users\Diana\Documents\Embarcadero\Studio\Projects\Unit2.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.930,C:\Users\Diana\Plumbers\Client\dm.pas=C:\Users\Diana\Plumbers\Client\dataModul.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.844,C:\Users\Diana\Plumbers\Client\errorLogin.dfm=C:\Users\Diana\Plumbers\Client\Unit1.dfm</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.977,=C:\Users\Diana\Plumbers\Client\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.227,C:\Users\Diana\Plumbers\Client\dataModul.pas=C:\Users\Diana\Plumbers\Client\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.930,C:\Users\Diana\Plumbers\Client\dataModul.pas=C:\Users\Diana\Plumbers\Client\dm.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.222,C:\Users\Diana\Documents\Embarcadero\Studio\Projects\Unit3.dfm=C:\Users\Diana\Documents\Embarcadero\Studio\Projects\orderInfo.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.629,C:\Users\Diana\Documents\Embarcadero\Studio\Projects\Client.dproj=C:\Users\Diana\Documents\Embarcadero\Studio\Projects\Project1.dproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.063,C:\Users\Diana\Documents\Embarcadero\Studio\Projects\operatorEntry.dfm=C:\Users\Diana\Documents\Embarcadero\Studio\Projects\Unit1.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.930,C:\Users\Diana\Plumbers\Client\dataModul.dfm=C:\Users\Diana\Plumbers\Client\dm.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.227,C:\Users\Diana\Plumbers\Client\dataModul.dfm=C:\Users\Diana\Plumbers\Client\Unit1.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.063,C:\Users\Diana\Documents\Embarcadero\Studio\Projects\operatorEntry.pas=C:\Users\Diana\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.488,C:\Users\Diana\Documents\Embarcadero\Studio\Projects\Unit2.dfm=C:\Users\Diana\Documents\Embarcadero\Studio\Projects\mainWindow.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.488,C:\Users\Diana\Documents\Embarcadero\Studio\Projects\Unit2.pas=C:\Users\Diana\Documents\Embarcadero\Studio\Projects\mainWindow.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.844,C:\Users\Diana\Plumbers\Client\Unit1.pas=C:\Users\Diana\Plumbers\Client\errorLogin.pas</Transaction>
     <Transaction>1899.12.30 00:00:00.000.349,=C:\Users\Diana\Plumbers\Client\Unit1.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.227,C:\Users\Diana\Plumbers\Client\Unit1.pas=C:\Users\Diana\Plumbers\Client\dataModul.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.222,C:\Users\Diana\Documents\Embarcadero\Studio\Projects\orderInfo.dfm=C:\Users\Diana\Documents\Embarcadero\Studio\Projects\Unit3.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.977,=C:\Users\Diana\Plumbers\Client\Unit1.pas</Transaction>
     <Transaction>1899.12.30 00:00:00.000.916,=C:\Users\Diana\Documents\Embarcadero\Studio\Projects\Unit2.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.063,C:\Users\Diana\Documents\Embarcadero\Studio\Projects\Unit1.dfm=C:\Users\Diana\Documents\Embarcadero\Studio\Projects\operatorEntry.dfm</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.844,C:\Users\Diana\Plumbers\Client\errorLogin.pas=C:\Users\Diana\Plumbers\Client\Unit1.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.930,C:\Users\Diana\Plumbers\Client\dm.dfm=C:\Users\Diana\Plumbers\Client\dataModul.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.844,C:\Users\Diana\Plumbers\Client\Unit1.dfm=C:\Users\Diana\Plumbers\Client\errorLogin.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.222,C:\Users\Diana\Documents\Embarcadero\Studio\Projects\Unit3.pas=C:\Users\Diana\Documents\Embarcadero\Studio\Projects\orderInfo.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.435,=C:\Users\Diana\Documents\Embarcadero\Studio\Projects\Unit3.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.179,=C:\Users\Diana\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
   </Transactions>
 </BorlandProject>
