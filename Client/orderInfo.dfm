@@ -2,7 +2,7 @@ object TOrderInfo: TTOrderInfo
   Left = 0
   Top = 0
   Caption = 'TOrderInfo'
-  ClientHeight = 361
+  ClientHeight = 306
   ClientWidth = 492
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -28,50 +28,50 @@ object TOrderInfo: TTOrderInfo
   end
   object Label2: TLabel
     Left = 25
-    Top = 163
+    Top = 147
     Width = 85
     Height = 13
     Caption = #1057#1090#1086#1080#1084#1086#1089#1090#1100' '#1091#1089#1083#1091#1075
   end
   object Label3: TLabel
     Left = 24
-    Top = 123
+    Top = 107
     Width = 86
     Height = 13
     Caption = #1054#1087#1080#1089#1072#1085#1080#1077' '#1079#1072#1082#1072#1079#1072
   end
   object Label4: TLabel
     Left = 55
-    Top = 85
+    Top = 69
     Width = 55
     Height = 13
     Caption = #1058#1080#1087' '#1079#1072#1082#1072#1072#1079
   end
   object Label5: TLabel
     Left = 55
-    Top = 235
+    Top = 219
     Width = 55
     Height = 13
     Caption = #1058#1077#1083'. '#1085#1086#1084#1077#1088
   end
   object Label6: TLabel
     Left = 79
-    Top = 198
+    Top = 182
     Width = 31
     Height = 13
     Caption = #1040#1076#1088#1077#1089
   end
   object eOrderType: TEdit
     Left = 128
-    Top = 82
+    Top = 66
     Width = 289
     Height = 21
     TabOrder = 0
   end
   object btnAddCustomer: TButton
-    Left = 184
-    Top = 279
-    Width = 113
+    Left = 272
+    Top = 255
+    Width = 145
     Height = 25
     Caption = #1044#1086#1073#1072#1074#1080#1090#1100' '#1079#1072#1082#1072#1079
     TabOrder = 1
@@ -79,28 +79,28 @@ object TOrderInfo: TTOrderInfo
   end
   object eOrderDescroption: TEdit
     Left = 128
-    Top = 120
+    Top = 104
     Width = 289
     Height = 21
     TabOrder = 2
   end
   object eOrderPrice: TEdit
     Left = 128
-    Top = 160
+    Top = 144
     Width = 289
     Height = 21
     TabOrder = 3
   end
   object eOrderPhone: TEdit
     Left = 128
-    Top = 232
+    Top = 216
     Width = 289
     Height = 21
     TabOrder = 4
   end
   object eOrderAddress: TEdit
     Left = 128
-    Top = 195
+    Top = 179
     Width = 289
     Height = 21
     TabOrder = 5

@@ -59,17 +59,17 @@ begin
 
     main.AddPair('task','order');
     main.AddPair('orderid','0');
-    main.AddPair('operatorid',intToStr(TOperatorEntry.opID));
+    main.AddPair('operatorid',TJSONNumber.Create(TOperatorEntry.opID));
     second.AddPair('creation_date',orderDate);
-    second.AddPair('order_operator_id',intToStr(TOperatorEntry.opID));
+    second.AddPair('order_operator_id',TJSONNumber.Create(TOperatorEntry.opID));
     second.AddPair('order_plumber_id','0');
     main.AddPair('orderdata', second);
     third.AddPair('type',orderType);
     third.AddPair('description',orderDesc);
-    third.AddPair('price',intToStr(orderPrice));
-    third.AddPair('phone',intToStr(orderPhone));
-    third.AddPair('description',orderAddress);
-    main.AddPair('order_info_data',third);
+    third.AddPair('price',TJSONNumber.Create(orderPrice));
+    third.AddPair('phone',TJSONNumber.Create(orderPhone));
+    third.AddPair('address',orderAddress);
+    main.AddPair('orderinfodata',third);
 
    dm.DataModule1.BackendEndpoint2.AddBody(main);
    dm.DataModule1.BackendEndpoint2.Execute;

@@ -6,7 +6,8 @@ uses
   mainWindow in 'mainWindow.pas' {fmMainWindow},
   orderInfo in 'orderInfo.pas' {TOrderInfo},
   dm in 'dm.pas' {DataModule1: TDataModule},
-  errorLogin in 'errorLogin.pas' {fmErrorLogin};
+  errorLogin in 'errorLogin.pas' {fmErrorLogin},
+  addPlumbers in 'addPlumbers.pas' {addPlumber};
 
 {$R *.res}
 
@@ -18,5 +19,6 @@ begin
   Application.CreateForm(TTOrderInfo, TOrderInfo);
   Application.CreateForm(TDataModule1, DataModule1);
   Application.CreateForm(TfmErrorLogin, fmErrorLogin);
+  Application.CreateForm(TaddPlumber, addPlumber);
   Application.Run;
 end.

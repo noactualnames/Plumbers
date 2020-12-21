@@ -30,6 +30,7 @@ type
   public
     { Public declarations }
       opID:integer;
+
   end;
 
 var
@@ -64,41 +65,14 @@ begin
   s:=dm.DataModule1.RESTResponseGet.Content;
 
   if (s.Length>45) then  begin
+
    responseJSON:=TJSONObject.ParseJSONValue(s) as TJSONObject;
       opID:=responseJSON.GetValue<integer>('ID');
 
-      fmMainWindow:=TfmMainWindow.Create(Application);
-      fmMainWindow.ShowModal;
-      fmMainWindow.Release;
-      close;
-
-//
-//       responseJSON:=TJSONObject.ParseJSONValue(s) as TJSONObject;
-//
-//       plumbers:=responseJSON.Values['plumbers'] as TJSONObject;
-//       orders:=responseJSON.Values['orders'] as TJSONObject;
-//       ordersinfo:=responseJSON.Values['ordersinfo'] as TJSONObject;
-//
-//       plumbersArray:=plumbers.FindValue('data') as TJSONArray;
-//       if Assigned(plumbersArray) then  begin
-//
-//          dm.DataModule1.dsetPlumbers.Open;
-//
-//          for i := 0 to plumbersArray.Count-1 do begin
-//
-//           plumbersArrayData:=plumbersArray.Items[i] as TJSONObject;
-//
-//           plumberId:=plumbersArrayData.getValue<integer>('PLUMBER_ID');
-//           plumberStatus:=plumbersArrayData.getValue<string>('PLUMBER_STATUS');
-//           plumberName:=plumbersArrayData.getValue<string>('PLUMBER_NAME');
-//
-//           dm.DataModule1.dsetPlumbers.FieldByName('PLUMBER_ID').AsInteger:=plumberId;
-//           dm.DataModule1.dsetPlumbers.FieldByName('PLUMBER_STATUS').AsString:=plumberStatus;
-//           dm.DataModule1.dsetPlumbers.FieldByName('PLUMBER_ID').AsString:=plumberName;
-//           dm.DataModule1.dsetPlumbers.Append;
-//          end;
-//        end
-
+    TOperatorEntry.Hide;
+    fmMainWindow:=TfmMainWindow.Create(Application);
+    fmMainWindow.ShowModal;
+    fmMainWindow.Release;
 
   end else begin
 

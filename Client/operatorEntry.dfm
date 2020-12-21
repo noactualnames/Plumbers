@@ -14,7 +14,7 @@ object TOperatorEntry: TTOperatorEntry
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
-    Left = 128
+    Left = 112
     Top = 24
     Width = 36
     Height = 21
@@ -54,10 +54,11 @@ object TOperatorEntry: TTOperatorEntry
     Width = 121
     Height = 21
     Hint = #1055#1072#1088#1086#1083#1100
+    PasswordChar = #9679
     TabOrder = 1
   end
   object btnEntry: TButton
-    Left = 85
+    Left = 76
     Top = 160
     Width = 121
     Height = 25
