@@ -415,7 +415,7 @@ begin
       PlumberID:= OrderData.GetValue('order_plumber_id').Value.ToInteger;
       if PlumberID = 0 then begin
         FDAddOrder.ParamByName('in_status').Value:= 'free';
-        UpdatePlumberStatus(PlumberID, 'offline', 3);
+        UpdatePlumberOrderStatus(0, '', ChangeOrCreateOrderID, '', 4);
       end;
       FDAddOrder.ParamByName('in_plumber_id').Value:= PlumberID;
       FDAddOrder.ExecProc;
@@ -629,6 +629,7 @@ begin
   ARequest.Params.TryGetValue('task', QueryTask);
 
   if QueryTask = 'auth' then JSONResponse:= AuthAccount(ARequest);
+//  AResponse.Headers.SetValue('Content-Length', '');
 
   AResponse.Body.SetValue(JSONResponse, True);
 end;
