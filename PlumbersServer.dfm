@@ -17,21 +17,28 @@ object PlumbersResource1: TPlumbersResource1
   object FDSelectOrders: TFDQuery
     Connection = FDPlumDBConnection
     SQL.Strings = (
-      'select * from ORDERS where order_status <> '#39'completed'#39';')
+      'select * from ORDERS where order_status <> '#39'accepted'#39';')
     Left = 48
     Top = 88
   end
   object FDSelectOrdersInfo: TFDQuery
     Connection = FDPlumDBConnection
     SQL.Strings = (
-      'select * from ORDER_INFO;')
+      
+        'select oi.order_info_id, oi.order_type, oi.order_description, oi' +
+        '.order_price, oi.customer_phone, oi.customer_address'
+      
+        ' from ORDER_INFO oi inner join ORDERS o on o.order_id = oi.order' +
+        '_info_id where o.order_status <> '#39'accepted'#39';  ')
     Left = 136
     Top = 88
   end
   object FDSelectPlumbers: TFDQuery
     Connection = FDPlumDBConnection
     SQL.Strings = (
-      'select plumber_id, plumber_status, plumber_name from PLUMBER;')
+      
+        'select plumber_id, plumber_status, plumber_name from PLUMBER whe' +
+        're plumber_status <> '#39'offline'#39';')
     Left = 240
     Top = 88
   end

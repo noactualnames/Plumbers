@@ -5,12 +5,15 @@ unit PlumbersServer;
 interface
 
 uses
-  System.SysUtils, System.Classes, System.JSON, System.Hash,
+  // Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
+  Data.DB,
+  IdTCPConnection, IdTCPClient,
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes, System.JSON, System.Hash,
   EMS.Services, EMS.ResourceAPI, EMS.ResourceTypes, FireDAC.Stan.Intf,
   FireDAC.Stan.Option, FireDAC.Stan.Error, FireDAC.UI.Intf, FireDAC.Phys.Intf,
   FireDAC.Stan.Def, FireDAC.Stan.Pool, FireDAC.Stan.Async, FireDAC.Phys,
   FireDAC.Phys.FB, FireDAC.Phys.FBDef, FireDAC.ConsoleUI.Wait,
-  FireDAC.Stan.Param, FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt, Data.DB,
+  FireDAC.Stan.Param, FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt,
   FireDAC.Comp.DataSet, FireDAC.Comp.Client;
 
 type
@@ -59,7 +62,8 @@ type
     function AssignPlumberToOrder(ARequest: TEndpointRequest): TJSONObject;
     function DisconnectPlumber(ARequest: TEndpointRequest): TJSONObject;
 
-    function test(ARequest: TEndpointRequest): TJSONObject;
+    function AcceptOrder(ARequest: TEndpointRequest): TJSONObject;
+
   end;
 
 implementation
@@ -392,6 +396,9 @@ begin
     ChangeOrCreateOrderID:= TmpOrderID.Value.ToInteger;
   if ResponseObject.TryGetValue('operatorid', TmpOpID) then
     OperatorID:= TmpOpID.Value.ToInteger;
+//    showmessage(TmpOrderID.Value + '   ' + TmpOpID.Value);
+    //showmessage(TmpOrderID.Value);
+//    showmessage(TmpOpID.Value);
   Result:= 0;
 
   if ResponseObject.TryGetValue('orderdata', OrderData) then begin
@@ -466,6 +473,7 @@ begin
   ResponseObject:= TJSONObject.Create;
 
   if ARequest.Body.TryGetObject(ResponseObject) then begin
+//    showmessage(ResponseObject.ToJSON());
     AddedOrderID:= AddOrChangeOrder(ResponseObject);
     AddedOrderInfoID:= AddOrChangeOrderInfo(ResponseObject, AddedOrderID);
 
@@ -579,7 +587,7 @@ begin
       FDAddOrder.FindParam('in_mode').Value:= 3;
       FDAddOrder.ExecProc;
       UpdateOrderStatus(OrderID, 'completed', 2);
-      UpdatePlumberStatus(PlumberID, 'online', 3);
+      UpdatePlumberStatus(PlumberID, 'waiting', 3);
       Result:= FormJSONResponseMessage('response', 'Action has correctly executed');
     end
     else Result:= FormJSONResponseMessage('error', 'Unknown action type');
@@ -611,9 +619,31 @@ begin
   else Result:= FormJSONResponseMessage('error', 'JSON expected');
 end;
 
-function TPlumbersResource1.test(ARequest: TEndpointRequest): TJSONObject;
+function TPlumbersResource1.AcceptOrder(ARequest: TEndpointRequest): TJSONObject;
+{
+  Описание:
+  Подтвержает выполненный заказ
+}
+var
+ResponseObject: TJSONObject;
+OrderID, PlumberID: integer;
 begin
-
+  Result:= TJSONObject.Create;
+  if ARequest.Body.TryGetObject(ResponseObject) then begin
+    if (ResponseObject.TryGetValue('plumber_id', PlumberID)) and
+    (ResponseObject.TryGetValue('order_id', OrderID)) then begin
+      FDUpdatePlumAndOrderStatus.Prepare;
+      FDUpdatePlumAndOrderStatus.ParamByName('in_order_id').Value:= OrderID;
+      FDUpdatePlumAndOrderStatus.ParamByName('in_plumber_id').Value:= PlumberID;
+      FDUpdatePlumAndOrderStatus.ParamByName('in_add_mode').Value:= 5;
+      FDUpdatePlumAndOrderStatus.ExecProc;
+      if FDUpdatePlumAndOrderStatus.ParamByName('out_updated').Value then
+        Result:= FormJSONResponseMessage('response', 'Correctly accepted the order.')
+      else Result:= FormJSONResponseMessage('error', 'Order was not accepted');
+    end
+    else Result:= FormJSONResponseMessage('error', 'Cant read the request parameters');
+  end
+  else Result:= FormJSONResponseMessage('error', 'JSON expected');
 end;
 
 procedure TPlumbersResource1.Get(const AContext: TEndpointContext; const ARequest: TEndpointRequest; const AResponse: TEndpointResponse);
@@ -653,6 +683,8 @@ begin
       if QueryTask = 'assign' then JSONResponse:= AssignPlumberToOrder(ARequest);
       if QueryTask = 'action' then JSONResponse:= SetDateToPlumbersAssignedOrder(ARequest);
       if QueryTask = 'disconnect' then JSONResponse:= DisconnectPlumber(ARequest);
+      if QueryTask = 'accept' then JSONResponse:= AcceptOrder(ARequest);
+
     end
     else JSONResponse:= FormJSONResponseMessage('error', 'Missing task parameter');
   end
