@@ -3,7 +3,7 @@ object TOrderInfo: TTOrderInfo
   Top = 0
   Caption = 'TOrderInfo'
   ClientHeight = 306
-  ClientWidth = 492
+  ClientWidth = 455
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -11,9 +11,10 @@ object TOrderInfo: TTOrderInfo
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  Position = poDesktopCenter
   PixelsPerInch = 96
   TextHeight = 13
-  object Label1: TLabel
+  object LabelInfoAdd: TLabel
     Left = 144
     Top = 18
     Width = 202
@@ -45,18 +46,18 @@ object TOrderInfo: TTOrderInfo
     Top = 69
     Width = 55
     Height = 13
-    Caption = #1058#1080#1087' '#1079#1072#1082#1072#1072#1079
+    Caption = #1058#1080#1087' '#1079#1072#1082#1072#1079#1072
   end
   object Label5: TLabel
     Left = 55
-    Top = 219
+    Top = 182
     Width = 55
     Height = 13
     Caption = #1058#1077#1083'. '#1085#1086#1084#1077#1088
   end
   object Label6: TLabel
     Left = 79
-    Top = 182
+    Top = 219
     Width = 31
     Height = 13
     Caption = #1040#1076#1088#1077#1089
@@ -69,12 +70,12 @@ object TOrderInfo: TTOrderInfo
     TabOrder = 0
   end
   object btnAddCustomer: TButton
-    Left = 272
+    Left = 240
     Top = 255
-    Width = 145
+    Width = 177
     Height = 25
     Caption = #1044#1086#1073#1072#1074#1080#1090#1100' '#1079#1072#1082#1072#1079
-    TabOrder = 1
+    TabOrder = 6
     OnClick = btnAddCustomerClick
   end
   object eOrderDescroption: TEdit
@@ -82,27 +83,36 @@ object TOrderInfo: TTOrderInfo
     Top = 104
     Width = 289
     Height = 21
-    TabOrder = 2
+    TabOrder = 1
   end
   object eOrderPrice: TEdit
     Left = 128
     Top = 144
     Width = 289
     Height = 21
-    TabOrder = 3
+    TabOrder = 2
   end
   object eOrderPhone: TEdit
+    Left = 128
+    Top = 179
+    Width = 289
+    Height = 21
+    TabOrder = 3
+  end
+  object eOrderAddress: TEdit
     Left = 128
     Top = 216
     Width = 289
     Height = 21
     TabOrder = 4
   end
-  object eOrderAddress: TEdit
+  object cancelBtn: TButton
     Left = 128
-    Top = 179
-    Width = 289
-    Height = 21
+    Top = 255
+    Width = 97
+    Height = 25
+    Caption = #1054#1090#1084#1077#1085#1072
     TabOrder = 5
+    OnClick = cancelBtnClick
   end
 end

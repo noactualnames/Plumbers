@@ -1,0 +1,45 @@
+unit changeOrderInfopas;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls;
+
+type
+  TchangeOrderForm = class(TForm)
+    LabelInfoAdd: TLabel;
+    Label2: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
+    Label5: TLabel;
+    Label6: TLabel;
+    eOrderType: TEdit;
+    btnAddCustomer: TButton;
+    eOrderDescroption: TEdit;
+    eOrderPrice: TEdit;
+    eOrderPhone: TEdit;
+    eOrderAddress: TEdit;
+    cancelBtn: TButton;
+    procedure cancelBtnClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  changeOrderForm: TchangeOrderForm;
+
+implementation
+
+{$R *.dfm}
+
+uses mainWindow;
+
+procedure TchangeOrderForm.cancelBtnClick(Sender: TObject);
+begin
+  changeOrderForm.Close;
+end;
+
+end.

@@ -1,0 +1,26 @@
+program Client;
+
+uses
+  Vcl.Forms,
+  operatorEntry in 'operatorEntry.pas' {TOperatorEntry},
+  mainWindow in 'mainWindow.pas' {fmMainWindow},
+  orderInfo in 'orderInfo.pas' {TOrderInfo},
+  dm in 'dm.pas' {DataModule1: TDataModule},
+  errorLogin in 'errorLogin.pas' {fmErrorLogin},
+  addPlumbers in 'addPlumbers.pas' {addPlumber},
+  cancelPlumberForm in 'cancelPlumberForm.pas' {cancelPlumbers};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TTOperatorEntry, TOperatorEntry);
+  Application.CreateForm(TfmMainWindow, fmMainWindow);
+  Application.CreateForm(TTOrderInfo, TOrderInfo);
+  Application.CreateForm(TDataModule1, DataModule1);
+  Application.CreateForm(TfmErrorLogin, fmErrorLogin);
+  Application.CreateForm(TaddPlumber, addPlumber);
+  Application.CreateForm(TcancelPlumbers, cancelPlumbers);
+  Application.Run;
+end.

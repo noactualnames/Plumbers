@@ -10,7 +10,7 @@ uses
 type
   TTOrderInfo = class(TForm)
     eOrderType: TEdit;
-    Label1: TLabel;
+    LabelInfoAdd: TLabel;
     btnAddCustomer: TButton;
     eOrderDescroption: TEdit;
     eOrderPrice: TEdit;
@@ -21,7 +21,10 @@ type
     Label5: TLabel;
     Label6: TLabel;
     eOrderAddress: TEdit;
+    cancelBtn: TButton;
     procedure btnAddCustomerClick(Sender: TObject);
+    procedure cancelBtnClick(Sender: TObject);
+
   private
     { Private declarations }
   public
@@ -38,20 +41,18 @@ uses operatorEntry, dm;
 
 procedure TTOrderInfo.btnAddCustomerClick(Sender: TObject);
 var orderType, orderDesc, orderAddress, postJSON, orderDate, url:string;
-     orderPrice:integer;
-      orderPhone:int64;
-      response1,resp:string;
-      main, second, third:TJSONObject;
-
-
+    orderPrice:integer;
+    orderPhone:int64;
+    response1,resp:string;
+    main, second, third:TJSONObject;
 begin
 
-   orderType:=eOrderType.Text;
-   orderDesc:=eOrderDescroption.Text;
-   orderPrice:=strToInt(eOrderPrice.Text);
-   orderAddress:=eOrderAddress.Text;
-   orderPhone:=strToInt(eOrderPhone.Text);
-   orderDate:=FormatDateTime('dd.mm.yyyy hh:nn:ss', now);
+    orderType:=eOrderType.Text;
+    orderDesc:=eOrderDescroption.Text;
+    orderPrice:=strToInt(eOrderPrice.Text);
+    orderAddress:=eOrderAddress.Text;
+    orderPhone:=strToInt(eOrderPhone.Text);
+    orderDate:=FormatDateTime('dd.mm.yyyy hh:nn:ss', now);
 
     main:=TJSONObject.Create;
     second:=TJSONObject.Create;
@@ -75,13 +76,19 @@ begin
    dm.DataModule1.BackendEndpoint2.Execute;
    response1:=dm.DataModule1.RESTResponsePost.Content;
 
+   TOrderInfo.Close;
+
    if (response1<>'{"response" : "New Data added"}') then begin
-         MessageDlg(response1,mtError, mbOKCancel, 0);
+         //MessageDlg(response1,mtError, mbOKCancel, 0);
 
    end else close;
 
+   TOrderInfo.Close;
+end;
 
-
+procedure TTOrderInfo.cancelBtnClick(Sender: TObject);
+begin
+  TOrderInfo.Close;
 end;
 
 end.

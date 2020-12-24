@@ -19,6 +19,8 @@ type
     add: TButton;
     cancel: TButton;
     procedure addClick(Sender: TObject);
+    procedure DBGrid1DrawColumnCell(Sender: TObject; const Rect: TRect;
+      DataCol: Integer; Column: TColumn; State: TGridDrawState);
   private
     { Private declarations }
   public
@@ -35,8 +37,8 @@ implementation
 uses mainWindow, dm;
 
 procedure TaddPlumber.addClick(Sender: TObject);
-var body: TJSONObject;
-s:string;
+    var body: TJSONObject;
+    s:string;
 begin
 
   body:=TJSONObject.Create;
@@ -50,6 +52,30 @@ begin
   s:=dm.DataModule1.RESTResponseGet.Content;
 
   addPlumber.Close;
+end;
+
+procedure TaddPlumber.DBGrid1DrawColumnCell(Sender: TObject; const Rect: TRect;
+  DataCol: Integer; Column: TColumn; State: TGridDrawState);
+begin
+
+    DBGrid1.Canvas.Brush.Color := clWhite;
+
+    if (Dbgrid1.Fields[1].Value = 'online') then
+      DBGrid1.Canvas.Brush.Color := clMoneyGreen;
+
+    if (Dbgrid1.Fields[1].Value = 'assigned') then
+      DBGrid1.Canvas.Brush.Color := clYellow;
+
+    if (Dbgrid1.Fields[1].Value = 'working') then
+      DBGrid1.Canvas.Brush.Color := clSkyBlue;
+
+    if (Dbgrid1.Fields[1].Value = 'waiting') then
+      DBGrid1.Canvas.Brush.Color := clTeal;
+
+    if (Dbgrid1.Fields[1].Value = null) then
+      DBGrid1.Canvas.Brush.Color := clWhite;
+
+    Dbgrid1.DefaultDrawColumnCell(Rect, DataCol, Column, State);
 end;
 
 end.
