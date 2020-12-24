@@ -14,7 +14,8 @@ uses
   FireDAC.Stan.Def, FireDAC.Stan.Pool, FireDAC.Stan.Async, FireDAC.Phys,
   FireDAC.Phys.FB, FireDAC.Phys.FBDef, FireDAC.ConsoleUI.Wait,
   FireDAC.Stan.Param, FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt,
-  FireDAC.Comp.DataSet, FireDAC.Comp.Client;
+  FireDAC.Comp.DataSet, FireDAC.Comp.Client, IdThreadComponent,
+  IdBaseComponent, IdComponent, IdUDPBase, IdUDPClient;
 
 type
   [ResourceName('Plumbers')]
@@ -34,6 +35,9 @@ type
     FDGetAssignedOrder: TFDStoredProc;
     FDSelectOneOrder: TFDQuery;
     FDSelectOneOrderInfo: TFDQuery;
+    IdUDPClient1: TIdUDPClient;
+    IdThreadComponent1: TIdThreadComponent;
+    procedure IdThreadComponent1Run(Sender: TIdThreadComponent);
   published
     procedure Get(const AContext: TEndpointContext; const ARequest: TEndpointRequest; const AResponse: TEndpointResponse);
     procedure Post(const AContext: TEndpointContext; const ARequest: TEndpointRequest; const AResponse: TEndpointResponse);
@@ -64,6 +68,7 @@ type
 
     function AcceptOrder(ARequest: TEndpointRequest): TJSONObject;
 
+    procedure OpenSocket();
   end;
 
 implementation
@@ -233,6 +238,18 @@ begin
     UpdatePlumberStatus(PlumberID, 'online', 3);
     Result.AddPair('order_id', TJSONNumber.Create(0));
   end;
+end;
+
+procedure TPlumbersResource1.IdThreadComponent1Run(Sender: TIdThreadComponent);
+begin
+  IdUDPClient1.Host:= 'localhost';
+  IdUDPClient1.Port:= 1488;
+  IdUDPClient1.Connect;
+  if IdUDPClient1.Connected=true then
+    begin
+      IdUDPClient1.Send('update');
+      IdThreadComponent1.Active:=False;
+    end;
 end;
 
 function TPlumbersResource1.GetAllDBData(): TJSONObject;
@@ -679,11 +696,23 @@ begin
   if ARequest.Body.TryGetObject(DataObject) then begin
     if DataObject.TryGetValue('task', QueryTask) then begin
       if QueryTask = 'reg' then JSONResponse:= RegisterAccount(ARequest);
-      if QueryTask = 'order' then  JSONResponse:= AddOrChangeOrderAndOrderInfo(ARequest);
-      if QueryTask = 'assign' then JSONResponse:= AssignPlumberToOrder(ARequest);
-      if QueryTask = 'action' then JSONResponse:= SetDateToPlumbersAssignedOrder(ARequest);
+      if QueryTask = 'order' then begin
+        JSONResponse:= AddOrChangeOrderAndOrderInfo(ARequest);
+        OpenSocket;
+      end;
+      if QueryTask = 'assign' then begin
+        JSONResponse:= AssignPlumberToOrder(ARequest);
+        OpenSocket;
+      end;
+      if QueryTask = 'action' then begin
+        JSONResponse:= SetDateToPlumbersAssignedOrder(ARequest);
+        OpenSocket;
+      end;
       if QueryTask = 'disconnect' then JSONResponse:= DisconnectPlumber(ARequest);
-      if QueryTask = 'accept' then JSONResponse:= AcceptOrder(ARequest);
+      if QueryTask = 'accept' then begin
+        JSONResponse:= AcceptOrder(ARequest);
+        OpenSocket;
+      end;
 
     end
     else JSONResponse:= FormJSONResponseMessage('error', 'Missing task parameter');
@@ -691,6 +720,14 @@ begin
   else JSONResponse:= FormJSONResponseMessage('error', 'JSON expected');
 
   AResponse.Body.SetValue(JSONResponse, True);
+end;
+
+procedure TPlumbersResource1.OpenSocket();
+begin
+  IdUDPClient1.Host:= 'localhost';
+  IdUDPClient1.Port:= 1488;
+  IdUDPClient1.Connect;
+  if IdUDPClient1.Connected=true then IdUDPClient1.Send('update');
 end;
 
 procedure Register;

@@ -444,4 +444,18 @@ object PlumbersResource1: TPlumbersResource1
         Value = Null
       end>
   end
+  object IdUDPClient1: TIdUDPClient
+    Port = 0
+    Left = 488
+    Top = 400
+  end
+  object IdThreadComponent1: TIdThreadComponent
+    Active = False
+    Loop = False
+    Priority = tpNormal
+    StopMode = smTerminate
+    OnRun = IdThreadComponent1Run
+    Left = 392
+    Top = 400
+  end
 end

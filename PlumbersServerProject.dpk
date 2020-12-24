@@ -35,7 +35,9 @@ requires
   FireDAC,
   FireDACCommonDriver,
   FireDACCommon,
-  FireDACIBDriver;
+  FireDACIBDriver,
+  IndySystem,
+  IndyCore;
 
 contains
   PlumbersServer in 'PlumbersServer.pas' {PlumbersResource1: TDataModule};
