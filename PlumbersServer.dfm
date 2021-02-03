@@ -4,12 +4,11 @@ object PlumbersResource1: TPlumbersResource1
   Width = 544
   object FDPlumDBConnection: TFDConnection
     Params.Strings = (
-      'Database=B:\Code\Projects\Plumbers potugi\PLUMBERAGENCY.FDB'
+      'Database=B:\Code\Projects\Plumbers server\PLUMBERAGENCY.FDB'
       'User_Name=sysdba'
       'Password=masterkey'
       'CharacterSet=win1251'
       'DriverID=FB')
-    Connected = True
     LoginPrompt = False
     Left = 48
     Top = 24

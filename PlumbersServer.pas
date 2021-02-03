@@ -243,7 +243,7 @@ end;
 procedure TPlumbersResource1.IdThreadComponent1Run(Sender: TIdThreadComponent);
 begin
   IdUDPClient1.Host:= 'localhost';
-  IdUDPClient1.Port:= 1488;
+  IdUDPClient1.Port:= 2222;
   IdUDPClient1.Connect;
   if IdUDPClient1.Connected=true then
     begin
@@ -725,7 +725,7 @@ end;
 procedure TPlumbersResource1.OpenSocket();
 begin
   IdUDPClient1.Host:= 'localhost';
-  IdUDPClient1.Port:= 1488;
+  IdUDPClient1.Port:= 2222;
   IdUDPClient1.Connect;
   if IdUDPClient1.Connected=true then IdUDPClient1.Send('update');
 end;
